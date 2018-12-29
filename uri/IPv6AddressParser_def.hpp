@@ -37,6 +37,15 @@ namespace phoenix = boost::phoenix;
 //            / [ *4( h16 ":" ) h16 ] "::"              ls32
 //            / [ *5( h16 ":" ) h16 ] "::"              h16
 //            / [ *6( h16 ":" ) h16 ] "::"
+//IPv6address =                            6( h16 ":" ) ls32
+//            /                       "::" [*5( h16 ":" ) (ls32|h16)
+//            / [               h16 ] "::" 4( h16 ":" ) ls32
+//            / [ *1( h16 ":" ) h16 ] "::" 3( h16 ":" ) ls32
+//            / [ *2( h16 ":" ) h16 ] "::" 2( h16 ":" ) ls32
+//            / [ *3( h16 ":" ) h16 ] "::"    h16 ":"   ls32
+//            / [ *4( h16 ":" ) h16 ] "::"              ls32
+//            / [ *5( h16 ":" ) h16 ] "::"              h16
+//            / [ *6( h16 ":" ) h16 ] "::"
 //
 //ls32        = ( h16 ":" h16 ) / IPv4address
 //            ; least-significant 32 bits of address
@@ -69,6 +78,7 @@ ipv6_address_grammar<Iterator>::ipv6_address_grammar()
 : ipv6_address_grammar::base_type( ipv6_address_rule, "ipv6_address" )
 {
   using qi::eps;
+  using qi::eoi;
   using qi::_1;
   using namespace qi::labels;
   using qi::on_error;
@@ -81,105 +91,141 @@ ipv6_address_grammar<Iterator>::ipv6_address_grammar()
   boost::phoenix::function<getLowByte>   phx_get_low_byte;
 
   ipv6_address_rule =
-      //IPv6address =                            6( h16 ":" ) ls32
       (    eps [ qi::_a = phoenix::begin(qi::_val) ]
         >> qi::repeat(6) [
               hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
            >> ':' ]
         >> least_sig_32bits_rule [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1), *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1) ] ) |
-      //            /                       "::" 5( h16 ":" ) ls32
-      (    eps [ qi::_a = phoenix::begin(qi::_val), *qi::_a++ = 0, *qi::_a++ = 0 ]
+      (    "::"
+        >> least_112bits_rule [ qi::_a = phoenix::begin(qi::_val), *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1),
+                                *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1), *qi::_a++ = at_c<4>(_1), *qi::_a++ = at_c<5>(_1),
+                                *qi::_a++ = at_c<6>(_1), *qi::_a++ = at_c<7>(_1), *qi::_a++ = at_c<8>(_1), *qi::_a++ = at_c<9>(_1),
+                                *qi::_a++ = at_c<10>(_1), *qi::_a++ = at_c<11>(_1), *qi::_a++ = at_c<12>(_1), *qi::_a++ = at_c<13>(_1) ] ) |
+      (    hex_16bits_rule  [ qi::_a = phoenix::begin(qi::_val), *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
         >> "::"
-        >> qi::repeat(5) [
-              hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
-           >> ':' ]
-        >> least_sig_32bits_rule [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1), *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1) ] ) |
-      //            / [               h16 ] "::" 4( h16 ":" ) ls32
-      (    eps [ qi::_a = phoenix::begin(qi::_val) ]
-        >> (  hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] |
-              eps [ *qi::_a++ = 0, *qi::_a++ = 0 ] )
+        >> least_96bits_rule [ *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1),
+                               *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1), *qi::_a++ = at_c<4>(_1), *qi::_a++ = at_c<5>(_1),
+                               *qi::_a++ = at_c<6>(_1), *qi::_a++ = at_c<7>(_1), *qi::_a++ = at_c<8>(_1), *qi::_a++ = at_c<9>(_1),
+                               *qi::_a++ = at_c<10>(_1), *qi::_a++ = at_c<11>(_1) ] ) |
+      (    hex_16bits_rule  [ qi::_a = phoenix::begin(qi::_val), *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
+        >> ':'
+        >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
         >> "::"
-        >> eps [ *qi::_a++ = 0, *qi::_a++ = 0 ]
-        >> qi::repeat(4) [
-              hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
-           >> ':' ]
-        >> least_sig_32bits_rule [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1), *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1) ] ) |
-      //            / [ *1( h16 ":" ) h16 ] "::" 3( h16 ":" ) ls32
-      (    eps [ qi::_a = phoenix::begin(qi::_val) ]
-        >> ( ( ( (    hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
-                   >> ':' ) |
-                 eps [ *qi::_a++ = 0, *qi::_a++ = 0 ] )
-               >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] ) |
-             eps [ *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0 ] )
+        >> least_80bits_rule [ *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1),
+                               *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1), *qi::_a++ = at_c<4>(_1), *qi::_a++ = at_c<5>(_1),
+                               *qi::_a++ = at_c<6>(_1), *qi::_a++ = at_c<7>(_1), *qi::_a++ = at_c<8>(_1), *qi::_a++ = at_c<9>(_1) ] ) |
+      (    hex_16bits_rule  [ qi::_a = phoenix::begin(qi::_val), *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
+        >> qi::repeat(2) [
+              ':'
+           >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] ]
         >> "::"
-        >> eps [ *qi::_a++ = 0, *qi::_a++ = 0 ]
+        >> least_64bits_rule [ *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1),
+                               *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1), *qi::_a++ = at_c<4>(_1), *qi::_a++ = at_c<5>(_1),
+                               *qi::_a++ = at_c<6>(_1), *qi::_a++ = at_c<7>(_1) ] ) |
+      (    hex_16bits_rule  [ qi::_a = phoenix::begin(qi::_val), *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
         >> qi::repeat(3) [
-              hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
-           >> ':' ]
-        >> least_sig_32bits_rule [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1), *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1) ] ) |
-        //            / [ *2( h16 ":" ) h16 ] "::" 2( h16 ":" ) ls32
-        (    eps [ qi::_a = phoenix::begin(qi::_val) ]
-          >> ( ( qi::repeat(2) [
-                 (    hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
-                   >> ':' ) |
-                 eps [ *qi::_a++ = 0, *qi::_a++ = 0 ] ]
-                 >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] ) |
-               eps [ *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0 ] )
-          >> "::"
-          >> eps [ *qi::_a++ = 0, *qi::_a++ = 0 ]
-          >> qi::repeat(2) [
-                hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
-             >> ':' ]
-          >> least_sig_32bits_rule [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1), *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1) ] ) |
-        //            / [ *3( h16 ":" ) h16 ] "::"    h16 ":"   ls32
-        (    eps [ qi::_a = phoenix::begin(qi::_val) ]
-          >> ( ( qi::repeat(3) [
-                 (    hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
-                   >> ':' ) |
-                 eps [ *qi::_a++ = 0, *qi::_a++ = 0 ] ]
-                 >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] ) |
-               eps [ *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0 ] )
-          >> "::"
-          >> eps [ *qi::_a++ = 0, *qi::_a++ = 0 ]
-          >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
-          >> ':'
-          >> least_sig_32bits_rule [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1), *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1) ] ) |
-        //            / [ *4( h16 ":" ) h16 ] "::"              ls32
-        (    eps [ qi::_a = phoenix::begin(qi::_val) ]
-          >> ( ( qi::repeat(4) [
-                 (    hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
-                   >> ':' ) |
-                 eps [ *qi::_a++ = 0, *qi::_a++ = 0 ] ]
-                 >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] ) |
-               eps [ *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0,
-                     *qi::_a++ = 0, *qi::_a++ = 0 ] )
-          >> "::"
-          >> eps [ *qi::_a++ = 0, *qi::_a++ = 0 ]
-          >> least_sig_32bits_rule [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1), *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1) ] ) |
-        //            / [ *5( h16 ":" ) h16 ] "::"              h16
-        (    eps [ qi::_a = phoenix::begin(qi::_val) ]
-          >> ( ( qi::repeat(5) [
-                 (    hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
-                   >> ':' ) |
-                 eps [ *qi::_a++ = 0, *qi::_a++ = 0 ] ]
-                 >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] ) |
-               eps [ *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0,
-                     *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0 ] )
-          >> "::"
-          >> eps [ *qi::_a++ = 0, *qi::_a++ = 0 ]
-          >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] ) |
-        //            / [ *6( h16 ":" ) h16 ] "::"
-        (    eps [ qi::_a = phoenix::begin(qi::_val) ]
-          >> ( ( qi::repeat(6) [
-                 (    hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
-                   >> ':' ) |
-                 eps [ *qi::_a++ = 0, *qi::_a++ = 0 ] ]
-                 >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] ) |
-               eps [ *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0,
-                     *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = 0 ] )
-          >> "::"
-          >> eps [ *qi::_a++ = 0, *qi::_a++ = 0 ] )
-        ;
+              ':'
+           >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] ]
+        >> "::"
+        >> least_48bits_rule [ *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1),
+                               *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1), *qi::_a++ = at_c<4>(_1), *qi::_a++ = at_c<5>(_1) ] ) |
+      (    hex_16bits_rule  [ qi::_a = phoenix::begin(qi::_val), *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
+        >> qi::repeat(4) [
+              ':'
+           >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] ]
+        >> "::"
+        >> least_32bits_rule [ *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1),
+                               *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1) ] ) |
+      (    hex_16bits_rule  [ qi::_a = phoenix::begin(qi::_val), *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
+        >> qi::repeat(5) [
+              ':'
+           >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] ]
+        >> "::"
+        >> least_16bits_rule [ *qi::_a++ = 0, *qi::_a++ = 0, *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] ) |
+      (    hex_16bits_rule  [ qi::_a = phoenix::begin(qi::_val), *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
+        >> qi::repeat(6) [
+              ':'
+           >> hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ] ]
+        >> "::"
+        >> eps [ *qi::_a++ = 0, *qi::_a++ = 0 ] )
+      ;
+
+  least_112bits_rule =
+      least_sig_112bits_rule [ _val = _1 ] |
+      least_96bits_rule [ at_c<0>(_val) = 0, at_c<1>(_val) = 0, at_c<2>(_val) = at_c<0>(_1), at_c<3>(_val) = at_c<1>(_1),
+                          at_c<4>(_val) = at_c<2>(_1), at_c<5>(_val) = at_c<3>(_1), at_c<6>(_val) = at_c<4>(_1), at_c<7>(_val) = at_c<5>(_1),
+                          at_c<8>(_val) = at_c<6>(_1), at_c<9>(_val) = at_c<7>(_1), at_c<10>(_val) = at_c<8>(_1), at_c<11>(_val) = at_c<9>(_1),
+                          at_c<12>(_val) = at_c<10>(_1), at_c<13>(_val) = at_c<11>(_1) ]
+      ;
+
+  least_sig_112bits_rule =
+         eps [ qi::_a = phoenix::begin(qi::_val) ]
+      >> qi::repeat(5) [
+            hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
+         >> ':' ]
+      >> least_sig_32bits_rule [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1), *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1) ]
+      ;
+
+  least_96bits_rule =
+      least_sig_96bits_rule [ _val = _1 ] |
+      least_80bits_rule [ at_c<0>(_val) = 0, at_c<1>(_val) = 0, at_c<2>(_val) = at_c<0>(_1), at_c<3>(_val) = at_c<1>(_1),
+                          at_c<4>(_val) = at_c<2>(_1), at_c<5>(_val) = at_c<3>(_1), at_c<6>(_val) = at_c<4>(_1), at_c<7>(_val) = at_c<5>(_1),
+                          at_c<8>(_val) = at_c<6>(_1), at_c<9>(_val) = at_c<7>(_1), at_c<10>(_val) = at_c<8>(_1), at_c<11>(_val) = at_c<9>(_1) ]
+      ;
+
+  least_sig_96bits_rule =
+         eps [ qi::_a = phoenix::begin(qi::_val) ]
+      >> qi::repeat(4) [
+            hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
+         >> ':' ]
+      >> least_sig_32bits_rule [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1), *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1) ]
+      ;
+
+  least_80bits_rule =
+      least_sig_80bits_rule [ _val = _1 ] |
+      least_64bits_rule [ at_c<0>(_val) = 0, at_c<1>(_val) = 0, at_c<2>(_val) = at_c<0>(_1), at_c<3>(_val) = at_c<1>(_1),
+                          at_c<4>(_val) = at_c<2>(_1), at_c<5>(_val) = at_c<3>(_1), at_c<6>(_val) = at_c<4>(_1), at_c<7>(_val) = at_c<5>(_1),
+                          at_c<8>(_val) = at_c<6>(_1), at_c<9>(_val) = at_c<7>(_1) ]
+      ;
+
+  least_sig_80bits_rule =
+         eps [ qi::_a = phoenix::begin(qi::_val) ]
+      >> qi::repeat(3) [
+            hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
+         >> ':' ]
+      >> least_sig_32bits_rule [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1), *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1) ]
+      ;
+
+  least_64bits_rule =
+      least_sig_64bits_rule [ _val = _1 ] |
+      least_48bits_rule [ at_c<0>(_val) = 0, at_c<1>(_val) = 0, at_c<2>(_val) = at_c<0>(_1), at_c<3>(_val) = at_c<1>(_1),
+                          at_c<4>(_val) = at_c<2>(_1), at_c<5>(_val) = at_c<3>(_1), at_c<6>(_val) = at_c<4>(_1), at_c<7>(_val) = at_c<5>(_1) ]
+      ;
+
+  least_sig_64bits_rule =
+         eps [ qi::_a = phoenix::begin(qi::_val) ]
+      >> qi::repeat(2) [
+            hex_16bits_rule  [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
+         >> ':' ]
+      >> least_sig_32bits_rule [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1), *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1) ]
+      ;
+
+  least_48bits_rule =
+      least_sig_48bits_rule [ _val = _1 ] |
+      least_32bits_rule [ at_c<0>(_val) = 0, at_c<1>(_val) = 0, at_c<2>(_val) = at_c<0>(_1), at_c<3>(_val) = at_c<1>(_1),
+                          at_c<4>(_val) = at_c<2>(_1), at_c<5>(_val) = at_c<3>(_1) ]
+      ;
+
+  least_sig_48bits_rule =
+         hex_16bits_rule [ qi::_a = phoenix::begin(qi::_val), *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1) ]
+      >> ':'
+      >> least_sig_32bits_rule [ *qi::_a++ = at_c<0>(_1), *qi::_a++ = at_c<1>(_1), *qi::_a++ = at_c<2>(_1), *qi::_a++ = at_c<3>(_1) ]
+      ;
+
+  least_32bits_rule =
+      least_sig_32bits_rule [ _val = _1 ] |
+      least_16bits_rule [ at_c<0>(_val) = 0, at_c<1>(_val) = 0, at_c<2>(_val) = at_c<0>(_1), at_c<3>(_val) = at_c<1>(_1) ]
+      ;
 
   //ls32        = ( h16 ":" h16 ) / IPv4address
   //            ; least-significant 32 bits of address
@@ -190,17 +236,29 @@ ipv6_address_grammar<Iterator>::ipv6_address_grammar()
       ipv4_address [ _val = _1 ]
       ;
 
+  least_16bits_rule =
+      hex_16bits_rule [ at_c<0>(_val) = at_c<0>(_1), at_c<1>(_val) = at_c<1>(_1) ] |
+      eps [ at_c<0>(_val) = 0, at_c<1>(_val) = 0 ]
+      ;
+
   //h16         = 1*4HEXDIG
   //            ; 16 bits of address represented in hexadecimal
   hex_16bits_rule =
       qi::uint_parser<boost::uint16_t, 16, 1, 4>() [ at_c<0>(_val) = phx_get_high_byte(_1), at_c<1>(_val) = phx_get_low_byte(_1) ]
       ;
 
-  ipv6_address_rule.name("ipv6_address");
 
-  least_sig_32bits_rule.name("east_sig_32bits");
+  ipv6_address_rule.name("ipv6_address");
+//  debug(ipv6_address_rule);
+//  BOOST_SPIRIT_DEBUG_NODE(ipv6_address_rule);
+
+  least_sig_32bits_rule.name("least_sig_32bits");
+//  debug(least_sig_32bits_rule);
+//  BOOST_SPIRIT_DEBUG_NODE(least_sig_32bits_rule);
 
   hex_16bits_rule.name("hex_16bits");
+//  debug(hex_16bits_rule);
+//  BOOST_SPIRIT_DEBUG_NODE(hex_16bits_rule);
 
 //  on_error<fail>
 //  (

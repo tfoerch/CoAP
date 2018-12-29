@@ -73,6 +73,228 @@ BOOST_AUTO_TEST_CASE( ipv6address )
     BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
     BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
   }
+  {
+    std::string input = "::8070:a183:4700:6e:aea4:dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "::8070:a183:0:546e:aea4:dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02::a183:4700:546e:aea4:dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "::a183:4700:546e:aea4:dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "::4700:546e:aea4:dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02::4700:15d:3863:62cf:947a";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070::4700:546e:aea4:dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "::546e:aea4:dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02::15d:3863:62cf:947a";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070::546e:aea4:dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183::546e:aea4:249.34.199.9";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "::aea4:dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02::3863:62cf:947a";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070::aea4:dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183::aea4:249.34.199.9";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183:4700::aea4:dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "::dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02::62cf:947a";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070::dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183::249.34.199.9";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183:4700::dfad:55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183:4700:15d::62cf:947a";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "::1";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02::947a";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070::55d3";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183::2";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183:4700::5d";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183:0:15d::947a";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183:0:15d:a69b::947a";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "::";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02::";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070::";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183::";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183:4700::";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183:0:15d::";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:a183:0:15d:a69b::";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
+  {
+    std::string input = "2a02:8070:0:a183:0:15d:a69b::";
+    byte_array16 result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+  }
 }
 
 BOOST_AUTO_TEST_CASE( test_bind )
