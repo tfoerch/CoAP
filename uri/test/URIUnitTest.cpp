@@ -12,7 +12,11 @@
 #include "uri/RFC3986RegNameParser.hpp"
 #include "uri/RFC3986HostParser.hpp"
 #include "uri/RFC3986AuthorityParser.hpp"
-#include "uri/UriParser.hpp"
+#include "uri/RFC3986PathAbEmptyParser.hpp"
+#include "uri/RFC3986PathAbsoluteParser.hpp"
+#include "uri/RFC3986PathRootLessParser.hpp"
+#include "uri/RFC3986HierPartParser.hpp"
+#include "uri/RFC3986UriParser.hpp"
 #include <boost/asio/ip/address_v4.hpp>
 #include <boost/asio/ip/address_v6.hpp>
 #include <string>
@@ -409,6 +413,170 @@ BOOST_AUTO_TEST_CASE( authority )
   //  std::cout << result << std::endl;
   }
 }
+
+BOOST_AUTO_TEST_CASE( path_ab_empty )
+{
+  using namespace rfc3986;
+
+  path_ab_empty_grammar<std::string::const_iterator>  grammar;
+  {
+    std::string input = "";
+    ast::PathAbEmpty result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    std::cout << '\'';
+    for (const std::string& segm : result.m_pathAbEmpty)
+        std::cout << '/' << segm;
+    std::cout << '\'' << std::endl;
+  }
+  {
+    std::string input = "/";
+    ast::PathAbEmpty result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    std::cout << '\'';
+    for (const std::string& segm : result.m_pathAbEmpty)
+        std::cout << '/' << segm;
+    std::cout << '\'' << std::endl;
+  }
+  {
+    std::string input = "/1st-segm/2nd-segm";
+    ast::PathAbEmpty result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    std::cout << '\'';
+    for (const std::string& segm : result.m_pathAbEmpty)
+        std::cout << '/' << segm;
+    std::cout << '\'' << std::endl;
+  }
+}
+
+BOOST_AUTO_TEST_CASE( path_absolute )
+{
+  using namespace rfc3986;
+
+  path_absolute_grammar<std::string::const_iterator>  grammar;
+  {
+    std::string input = "/";
+    ast::PathAbsolute result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    std::cout << '\'' << '/';
+    for (const std::string& segm : result.m_pathAbsolute)
+        std::cout << '/' << segm;
+    std::cout << '\'' << std::endl;
+  }
+  {
+    std::string input = "/1st-segm/2nd-segm";
+    ast::PathAbsolute result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    std::cout << '\'';
+    for (const std::string& segm : result.m_pathAbsolute)
+        std::cout << '/' << segm;
+    std::cout << '\'' << std::endl;
+  }
+}
+
+
+BOOST_AUTO_TEST_CASE( path_root_less )
+{
+  using namespace rfc3986;
+
+  path_root_less_grammar<std::string::const_iterator>  grammar;
+  {
+    std::string input = "1st-segm/2nd-segm";
+    ast::PathRootLess result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+    std::cout << '\'';
+    for (ast::SeqOfStrings::const_iterator iter = result.m_pathRootLess.begin();
+        iter != result.m_pathRootLess.end();
+        ++iter)
+    {
+      if (iter != result.m_pathRootLess.begin())
+      {
+        std::cout << '/';
+      }
+      std::cout << *iter;
+    }
+    std::cout << '\'' << std::endl;
+  }
+}
+
+BOOST_AUTO_TEST_CASE( hier_part )
+{
+  using namespace rfc3986;
+
+  hier_part_grammar<std::string::const_iterator>  grammar;
+  {
+    std::string input = "[2a02:8070:a183:0:15d::947a]//";
+    ast::HierPart result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+  }
+  {
+    std::string input = "[2a02:8070:a183:0:15d::947a]:8080///1st-segm/2nd-segm";
+    ast::HierPart result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+  //  std::cout << result << std::endl;
+  }
+  {
+    std::string input = "example_%a1%83.com:8080///";
+    ast::HierPart result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+  //  std::cout << result << std::endl;
+  }
+  {
+    std::string input = "tom@249.34.199.9///1st-segm/2nd-segm";
+    ast::HierPart result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+  //  std::cout << result << std::endl;
+  }
+  {
+    std::string input = "/1st-segm/2nd-segm";
+    ast::HierPart result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+  //  std::cout << result << std::endl;
+  }
+  {
+    std::string input = "1st-segm/2nd-segm";
+    ast::HierPart result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+  //  std::cout << result << std::endl;
+  }
+  {
+    std::string input = "";
+    ast::HierPart result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+  //  std::cout << result << std::endl;
+  }
+}
+
+BOOST_AUTO_TEST_CASE( uri )
+{
+  using namespace rfc3986;
+
+  //Uri         = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
+  uri_grammar<std::string::const_iterator>  grammar;
+  {
+    std::string input = "http:[2a02:8070:a183:0:15d::947a]//";
+    ast::Uri result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+  }
+  {
+    std::string input = "https:[2a02:8070:a183:0:15d::947a]:8080///1st-segm/2nd-segm?whois&arg1#topic3";
+    ast::Uri result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+  //  std::cout << result << std::endl;
+  }
+  {
+    std::string input = "http:example_%a1%83.com:8080///";
+    ast::Uri result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+  //  std::cout << result << std::endl;
+  }
+  {
+    std::string input = "ftp:tom@249.34.199.9///1st-segm/2nd-segm";
+    ast::Uri result;
+    BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
+  //  std::cout << result << std::endl;
+  }
+}
+
 
 BOOST_AUTO_TEST_CASE( test_bind )
 {
