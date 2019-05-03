@@ -10,8 +10,6 @@
 
 #include <boost/asio/detail/array.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/cstdint.hpp>
-
 
 namespace rfc3986
 {

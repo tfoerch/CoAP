@@ -6,7 +6,7 @@ project (coap)
 # list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
 option(USE_CLANG "build application with clang" OFF) # OFF is the default
 option(USE_SPIRIT_X3 "use spirit X3 for parsing" OFF) # OFF is the default
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # build local boost and use it
 # ./bootstrap.sh --with-toolset=clang --prefix=/home/tom/3rdParty --exec-prefix=/home/tom/3rdParty/clang
@@ -19,8 +19,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(BOOST_ROOT "${PROJECT_SOURCE_DIR}/../../3rdParty")
 set(BOOST_INCLUDEDIR "${BOOST_ROOT}/include")
 if(USE_CLANG)
-SET (CMAKE_CXX_COMPILER             "/usr/bin/clang++-6.0")
-SET (CMAKE_C_COMPILER               "/usr/bin/clang-6.0")
+SET (CMAKE_CXX_COMPILER             "/usr/bin/clang++-7.0")
+SET (CMAKE_C_COMPILER               "/usr/bin/clang-7.0")
 SET(_CMAKE_TOOLCHAIN_PREFIX "llvm-")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -v -stdlib=libc++")
 #set (CMAKE_CXX_FLAGS "-std=c++14 -stdlib=libc++")
@@ -30,6 +30,8 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
 #set (CMAKE_EXE_LINKER_FLAGS "-lc++ -lc++abi -v" )
 set(BOOST_LIBRARYDIR "${BOOST_ROOT}/clang/lib")
 else(USE_CLANG)
+SET (CMAKE_CXX_COMPILER             "/usr/bin/g++-9")
+SET (CMAKE_C_COMPILER               "/usr/bin/gcc-9")
 set(BOOST_LIBRARYDIR "${BOOST_ROOT}/g++/lib")
 endif(USE_CLANG)
 

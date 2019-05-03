@@ -6,7 +6,9 @@
  */
 
 #include "uri/RFC3986IPv4AddressParser.hpp"
+#include "uri/RFC3986IPv4AddressGenerator.hpp"
 #include "uri/RFC3986IPv6AddressParser.hpp"
+#include "uri/RFC3986IPv6AddressGenerator.hpp"
 #include "uri/RFC3986IPvFutureParser.hpp"
 #include "uri/RFC3986IPLiteralParser.hpp"
 #include "uri/RFC3986RegNameParser.hpp"
@@ -17,8 +19,15 @@
 #include "uri/RFC3986PathRootLessParser.hpp"
 #include "uri/RFC3986HierPartParser.hpp"
 #include "uri/RFC3986UriParser.hpp"
+#include <numeric>
+#include <unordered_map>
 #include <boost/asio/ip/address_v4.hpp>
 #include <boost/asio/ip/address_v6.hpp>
+#include <boost/ptr_container/ptr_deque.hpp>
+#include <boost/range/algorithm.hpp>
+#include <boost/range/adaptors.hpp>
+//#include <boost/range/adaptor/transformed.hpp>
+//#include <boost/range/algorithm/copy.hpp>
 #include <string>
 #include <iostream>
 
@@ -32,25 +41,94 @@
 // #include <BoostTestTargetConfig.h>
 // #include <boost/test/included/unit_test.hpp>
 
+class A
+{
+public:
+  virtual ~A(){}
+  unsigned int getValue() const
+  { return do_getValue(); }
+  A* clone() const
+  { return do_clone(); }
+private:
+  virtual unsigned int do_getValue() const = 0;
+  virtual A* do_clone() const = 0;
+};
+
+struct IsEvenFtor
+{
+  bool operator()(
+    const A& a) const
+  { return (a.getValue() % 2 == 0); }
+};
+struct GetValueFtor
+{
+  unsigned int operator()(
+    const A& a) const
+  { return a.getValue(); }
+};
+
+class B : public A
+{
+public:
+  explicit B(
+    unsigned int value)
+  : m_value(value)
+  {}
+private:
+  virtual unsigned int do_getValue() const
+  { return m_value; }
+  virtual A* do_clone() const
+  { return new B(*this); }
+  B(const B& other)
+  : m_value(other.m_value)
+  {}
+  unsigned int m_value;
+};
+
 
 BOOST_AUTO_TEST_SUITE( ipaddress )
+
+
+BOOST_AUTO_TEST_CASE( adapters )
+{
+  boost::ptr_deque<A> container;
+  container.push_back(new B(1));
+  container.push_back(new B(2));
+  container.push_back(new B(3));
+  container.push_back(new B(4));
+  boost::transform(container, std::ostream_iterator<int>(std::cout, ","), GetValueFtor());
+  boost::copy(container |
+              boost::adaptors::filtered(IsEvenFtor()) |
+              boost::adaptors::transformed(GetValueFtor()),
+              std::ostream_iterator<int>(std::cout, ","));
+}
 
 BOOST_AUTO_TEST_CASE( ipv4address )
 {
   using namespace rfc3986;
 
   ipv4_address_grammar<std::string::const_iterator>  grammar;
+  typedef std::back_insert_iterator<std::string>  StrOutIterType;
+  generator::ipv4_address_grammar<StrOutIterType> generator_grammar;
   {
     std::string input = "2.123.34.255";
     byte_array4 result;
     BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
     BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v4(result), boost::asio::ip::make_address_v4(input));
+    std::string output;
+    StrOutIterType outIter(output);
+    BOOST_CHECK(generate(outIter, generator_grammar, result));
+    BOOST_CHECK_EQUAL(output, input);
   }
   {
     std::string input = "249.34.199.9";
     byte_array4 result;
     BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
     BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v4(result), boost::asio::ip::make_address_v4(input));
+    std::string output;
+    StrOutIterType outIter(output);
+    BOOST_CHECK(generate(outIter, generator_grammar, result));
+    BOOST_CHECK_EQUAL(output, input);
   }
   {
     std::string input = "139.99.256.19";
@@ -68,11 +146,17 @@ BOOST_AUTO_TEST_CASE( ipv6address )
   using namespace rfc3986;
 
   ipv6_address_grammar<std::string::const_iterator>  grammar;
+  typedef std::back_insert_iterator<std::string>  StrOutIterType;
+  generator::ipv6_address_grammar<StrOutIterType> generator_grammar;
   {
     std::string input = "2a02:8070:a183:4700:15d:3863:62cf:947a";
     byte_array16 result;
     BOOST_CHECK(parse(input.cbegin(), input.cend(), grammar, result));
     BOOST_CHECK_EQUAL(boost::asio::ip::make_address_v6(result), boost::asio::ip::make_address_v6(input));
+    std::string output;
+    StrOutIterType outIter(output);
+    BOOST_CHECK(generate(outIter, generator_grammar, result));
+    BOOST_CHECK_EQUAL(output, input);
   }
   {
     std::string input = "2a02:8070:a183:4700:546e:aea4:dfad:55d3";
