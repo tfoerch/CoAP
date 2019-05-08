@@ -65,6 +65,7 @@ include_directories ("${BOOST_INCLUDEDIR}"
                      "${PROJECT_SOURCE_DIR}")
 
 add_subdirectory (uri)
+add_subdirectory (xml)
 
 enable_testing()
 
