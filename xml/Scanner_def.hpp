@@ -9,6 +9,9 @@
 
 #include "Scanner.hpp"
 
+//#define BOOST_SPIRIT_DEBUG
+//#define BOOST_SPIRIT_LEXERTL_DEBUG
+
 namespace xml { namespace lexer
 {
   template <typename BaseIterator>
@@ -18,8 +21,20 @@ namespace xml { namespace lexer
     m_emptyElem_tag_end("\\/>", token_ids::emptyElem_tag_end),
     m_tag_end(">", token_ids::tag_end),
     m_etag_mark("\\/", token_ids::etag_mark),
-    m_comment_mark("!", token_ids::comment_mark),
+    m_declaration_mark("!", token_ids::declaration_mark),
+    m_xml_decl_begin("<?xml", token_ids::xml_decl_begin),
+    m_xml_decl_end("?>", token_ids::xml_decl_end),
+    m_single_quota("'", token_ids::single_quota),
+    m_double_quote("\\\"", token_ids::double_quote),
+    m_equal("=", token_ids::equal),
+    m_doctypedecl_begin_mark("<!DOCTYPE", token_ids::doctypedecl_begin_mark),
+    m_cdata_begin_mark("<![CDATA[", token_ids::cdata_begin_mark),
+    m_cdata_end_mark("]]>", token_ids::cdata_end_mark),
+    m_comment_begin_mark("<!--", token_ids::comment_begin_mark),
+    m_comment_end_mark("-->", token_ids::comment_end_mark),
     m_name("[:a-zA-Z_][:a-zA-Z_0-9]*", token_ids::name),
+    m_char_data("[^<&]+-([^<&]* ']]>' [^<&]*)", token_ids::char_data),
+    m_whitespace("[ \t\n\r]+", token_ids::whitespace),
     m_comment("<!--(([^-])|([-][^-]))*-->", token_ids::comment)
   {
     lex::_pass_type _pass;
@@ -30,13 +45,12 @@ namespace xml { namespace lexer
         | m_tag_end
         | m_emptyElem_tag_end
         | m_etag_mark
-        | m_comment_mark
+        | m_declaration_mark
+        | m_equal
         | m_name
+        | m_char_data
         | m_comment
-        | lex::string("[ \t\n\r]+", token_ids::whitespace)
-          [
-            lex::_pass = lex::pass_flags::pass_ignore
-          ]
+        | m_whitespace
         ;
     }
 

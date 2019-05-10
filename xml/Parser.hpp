@@ -21,7 +21,7 @@ namespace xml
     namespace qi = boost::spirit::qi;
 
     template <typename Iterator, typename Lexer>
-    struct element : qi::grammar<Iterator, ast::element(), qi::locals<std::string>>
+    struct element : qi::grammar<Iterator, ast::Element(), qi::locals<std::string>>
     {
       typedef error_handler<typename Lexer::base_iterator_type, Iterator>
       error_handler_type;
@@ -30,13 +30,15 @@ namespace xml
       template <typename Attrib, typename Context>
       void checkEndTagName(Attrib& attr, Context& context, bool& pass);
 
-      Lexer const&                                                    m_lexer;
+      qi::rule<Iterator, ast::CharData()>                             m_char_data;
+      qi::rule<Iterator, ast::Comment()>                              m_comment;
       qi::rule<Iterator, std::string()>                               m_start_tag_prefix;
       qi::rule<Iterator, void(std::string), qi::locals<std::string>>  m_end_tag;
-      qi::rule<Iterator, std::vector<ast::content>()>                 m_empty_element;
-      qi::rule<Iterator, std::vector<ast::content>(std::string)>      m_element_with_content;
-      qi::rule<Iterator, ast::element(), qi::locals<std::string>>     m_element;
-      qi::rule<Iterator, ast::content()>                              m_content;
+      qi::rule<Iterator, ast::Content()>                              m_empty_element;
+      qi::rule<Iterator, ast::Content(std::string)>                   m_element_with_content;
+      qi::rule<Iterator, ast::Element(), qi::locals<std::string>>     m_element;
+      qi::rule<Iterator, ast::Content()>                              m_markup_content;
+      qi::rule<Iterator, ast::Content()>                              m_content;
     };
   }
 }

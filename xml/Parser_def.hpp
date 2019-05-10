@@ -17,6 +17,7 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/optional/optional_io.hpp>
 
 namespace xml
 {
@@ -31,8 +32,7 @@ namespace xml
     element<Iterator, Lexer>::element(
       error_handler<typename Lexer::base_iterator_type, Iterator>& error_handler,
       Lexer const& l)
-    : element::base_type(m_element, "element"),
-      m_lexer(l)
+    : element::base_type(m_element, "element")
     {
       qi::_1_type _1;
       qi::_2_type _2;
@@ -43,11 +43,13 @@ namespace xml
 
       using namespace qi::labels;
 
+      using qi::debug;
       using qi::eps;
       using qi::attr;
       using qi::on_error;
       using qi::on_success;
       using qi::fail;
+      using phoenix::at_c;
       using boost::phoenix::function;
 
       typedef xml::error_handler<typename Lexer::base_iterator_type, Iterator>
@@ -55,31 +57,47 @@ namespace xml
       typedef function<error_handler_type> error_handler_function;
       typedef function<xml::annotation<Iterator> > annotation_function;
 
+      m_char_data =
+              ( l.m_char_data | l.m_name ) [ at_c<0>(_val) = _1 ]
+          ;
+
+      m_comment =
+              l.m_comment [ at_c<0>(_val) = _1 ]
+          ;
+
       m_start_tag_prefix %=
-              m_lexer.m_tag_begin
-          >>  !( m_lexer.m_etag_mark |
-                 m_lexer.m_comment_mark )
-          >   m_lexer.m_name
+              l.m_tag_begin
+          >>  !( l.m_etag_mark |
+                 l.m_declaration_mark )
+          >   l.m_name
       ;
 
       m_end_tag =
-              m_lexer.m_etag_begin
-          >   m_lexer.m_name [boost::spirit::_a = _1]
+              l.m_etag_begin
+          >   l.m_name [boost::spirit::_a = _1]
           >   eps(boost::spirit::_a == boost::spirit::_r1) // same name as in start_tag
-          >   m_lexer.m_tag_end
+          >   l.m_tag_end
           ;
 
-      m_content %= ( m_element | l.m_name | l.m_comment )
+      m_markup_content %=
+          (   m_element |
+              m_comment )
+          >>  -m_char_data
+          ;
+
+      m_content %=
+              -m_char_data
+          >>  *m_markup_content // CharData? ((element | Reference | CDSect | PI | Comment) CharData?)*
           ;
 
       m_empty_element %=
               l.m_emptyElem_tag_end
-          > attr(std::vector<ast::content>())
+          > attr(ast::Content())
           ;
 
       m_element_with_content %=
               l.m_tag_end
-          >   *m_content
+          >   m_content
           >   m_end_tag(boost::spirit::_r1)
           ;
 
@@ -93,18 +111,32 @@ namespace xml
       m_element_with_content.name("element_with_content");
       m_empty_element.name("empty_element");
       m_content.name("content");
+      m_markup_content.name("markup_content");
       m_start_tag_prefix.name("start_tag_prefix");
       m_end_tag.name("end_tag");
+      m_char_data.name("char_data");
+      m_comment.name("comment");
       // Debugging and error handling and reporting support.
       BOOST_SPIRIT_DEBUG_NODES(
+          (m_char_data)
+          (m_comment)
           (m_start_tag_prefix)
           (m_end_tag)
           (m_content)
+          (m_markup_content)
           (m_element_with_content)
           (m_empty_element)
           (m_element)
       );
-
+      debug(m_element);
+      debug(m_empty_element);
+      debug(m_element_with_content);
+      debug(m_markup_content);
+      debug(m_content);
+      debug(m_end_tag);
+      debug(m_start_tag_prefix);
+      debug(m_comment);
+      debug(m_char_data);
       // Error handling: on error in start, call error_handler.
       on_error<fail>(m_element,
                      error_handler_function(error_handler)(

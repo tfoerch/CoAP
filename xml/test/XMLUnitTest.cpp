@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE( elements )
     base_iterator_type last = input.end();
     iterator_type iter = scanner.begin(first, last);
     iterator_type end = scanner.end();
-    ast::element result;
+    ast::Element result;
     xml::error_handler<base_iterator_type, iterator_type>
         error_handler(first, last);             // Our error handler
     parser::element<iterator_type, lexer_type>  grammar(error_handler, scanner);
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( elements )
     base_iterator_type last = input.end();
     iterator_type iter = scanner.begin(first, last);
     iterator_type end = scanner.end();
-    ast::element result;
+    ast::Element result;
     xml::error_handler<base_iterator_type, iterator_type>
         error_handler(first, last);             // Our error handler
     parser::element<iterator_type, lexer_type>  grammar(error_handler, scanner);
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( elements )
     base_iterator_type last = input.end();
     iterator_type iter = scanner.begin(first, last);
     iterator_type end = scanner.end();
-    ast::element result;
+    ast::Element result;
     xml::error_handler<base_iterator_type, iterator_type>
         error_handler(first, last);             // Our error handler
     parser::element<iterator_type, lexer_type>  grammar(error_handler, scanner);
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE( elements )
     base_iterator_type last = input.end();
     iterator_type iter = scanner.begin(first, last);
     iterator_type end = scanner.end();
-    ast::element result;
+    ast::Element result;
     xml::error_handler<base_iterator_type, iterator_type>
         error_handler(first, last);             // Our error handler
     parser::element<iterator_type, lexer_type>  grammar(error_handler, scanner);
@@ -101,13 +101,13 @@ BOOST_AUTO_TEST_CASE( elements )
     BOOST_CHECK_EQUAL(result.children.size(), 1);
   }
   {
-    std::string input = "<foo><!-- --></foo>";
-//    std::string input = "<foo><!-- declarations for <head> & <body> --></foo>";
+//    std::string input = "<foo><!-- --></foo>";
+    std::string input = "<foo><!-- declarations for <head> & <body> --></foo>";
     base_iterator_type first = input.begin();
     base_iterator_type last = input.end();
     iterator_type iter = scanner.begin(first, last);
     iterator_type end = scanner.end();
-    ast::element result;
+    ast::Element result;
     xml::error_handler<base_iterator_type, iterator_type>
         error_handler(first, last);             // Our error handler
     parser::element<iterator_type, lexer_type>  grammar(error_handler, scanner);
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE( elements )
     base_iterator_type last = input.end();
     iterator_type iter = scanner.begin(first, last);
     iterator_type end = scanner.end();
-    ast::element result;
+    ast::Element result;
     xml::error_handler<base_iterator_type, iterator_type>
         error_handler(first, last);             // Our error handler
     parser::element<iterator_type, lexer_type>  grammar(error_handler, scanner);
