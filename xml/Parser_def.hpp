@@ -58,18 +58,31 @@ namespace xml
       typedef function<xml::annotation<Iterator> > annotation_function;
 
       m_char_data =
-              ( l.m_char_data | l.m_name ) [ at_c<0>(_val) = _1 ]
+              l.m_char_data [ at_c<0>(_val) = _1 ]
           ;
 
       m_comment =
-              l.m_comment [ at_c<0>(_val) = _1 ]
+          l.m_comment_begin_mark
+          >   // qi::in_state("COMMENT")
+              // [
+                 // the lexer is in the 'ETAG' state during
+                 // matching of the following parser components
+                      l.m_comment [ at_c<0>(_val) = _1 ]
+                 >>   l.m_comment_end_mark
+              // ]
+
           ;
 
       m_start_tag_prefix %=
               l.m_tag_begin
           >>  !( l.m_etag_mark |
                  l.m_declaration_mark )
-          >   l.m_name
+          >   // qi::in_state("ETAG")
+              // [
+                 // the lexer is in the 'ETAG' state during
+                 // matching of the following parser components
+                 l.m_name
+              // ]
       ;
 
       m_end_tag =

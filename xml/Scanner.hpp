@@ -37,7 +37,7 @@ namespace xml
         // as every token instance stores an iterator pair pointing to the
         // matched input sequence.
         typedef lex::lexertl::position_token<
-            BaseIterator, token_value_types, boost::mpl::false_
+            BaseIterator, token_value_types, boost::mpl::true_
             > token_type;
 
         // use the lexer based on runtime generated DFA tables
@@ -126,6 +126,7 @@ namespace xml
         lex::token_def<lex::omit>   m_comment_end_mark;
         lex::token_def<std::string> m_name;
         lex::token_def<std::string> m_char_data;
+        lex::token_def<std::string> m_cdata;
         lex::token_def<std::string> m_whitespace;
         lex::token_def<std::string> m_comment;
 //        keyword_map_type keywords_;

@@ -27,6 +27,7 @@ namespace xml
       equal,
       doctypedecl_begin_mark,
       cdata_begin_mark,
+      cdata,
       cdata_end_mark,
       comment_begin_mark,
       comment_end_mark,

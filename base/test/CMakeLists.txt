@@ -1,5 +1,5 @@
 # Add executable called "LMP_T" that is built from the source files
-include_directories ("${PROJECT_SOURCE_DIR}/xml/test")
+include_directories ("${PROJECT_SOURCE_DIR}/base/test")
 #set(BOOST_ROOT "${PROJECT_SOURCE_DIR}/../../3rdParty")
 #set(BOOST_INCLUDEDIR "${BOOST_ROOT}/include")
 #if(USE_CLANG)
@@ -8,10 +8,9 @@ include_directories ("${PROJECT_SOURCE_DIR}/xml/test")
 #set(BOOST_LIBRARYDIR "${BOOST_ROOT}/g++/lib")
 #endif(USE_CLANG)
 
-find_package(Boost COMPONENTS unit_test_framework system)
-find_package(ICU COMPONENTS data i18n io uc tu -le-hb test)
+find_package(Boost COMPONENTS unit_test_framework timer chrono system)
 enable_testing()
-add_executable (XMLUnitTest_T XMLUnitTest.cpp)
+add_executable (BaseUnitTest_T BaseUnitTest.cpp)
 
 #add_boost_test(BaseUnitTest_T
 #               SOURCES BaseUnitTest.cpp
@@ -27,9 +26,9 @@ add_executable (XMLUnitTest_T XMLUnitTest.cpp)
 # Link the executable to the Hello library. Since the Hello library has
 # public include directories we will use those link directories when building
 
-target_link_libraries (XMLUnitTest_T LINK_PUBLIC coap_xml ${Boost_LIBRARIES} ${ICU_LIBRARIES})
+target_link_libraries (BaseUnitTest_T LINK_PUBLIC coap_base ${Boost_LIBRARIES})
 
-add_test(NAME xmlUnitTests COMMAND XMLUnitTest_T)
+add_test(NAME baseUnitTests COMMAND BaseUnitTest_T)
 
 
 #INSTALL(TARGETS LMP_T DESTINATION bin)

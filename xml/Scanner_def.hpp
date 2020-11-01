@@ -28,29 +28,55 @@ namespace xml { namespace lexer
     m_double_quote("\\\"", token_ids::double_quote),
     m_equal("=", token_ids::equal),
     m_doctypedecl_begin_mark("<!DOCTYPE", token_ids::doctypedecl_begin_mark),
-    m_cdata_begin_mark("<![CDATA[", token_ids::cdata_begin_mark),
+    m_cdata_begin_mark("<!\\\[CDATA\\\[", token_ids::cdata_begin_mark),
     m_cdata_end_mark("]]>", token_ids::cdata_end_mark),
     m_comment_begin_mark("<!--", token_ids::comment_begin_mark),
     m_comment_end_mark("-->", token_ids::comment_end_mark),
     m_name("[:a-zA-Z_][:a-zA-Z_0-9]*", token_ids::name),
-    m_char_data("[^<&]+-([^<&]* ']]>' [^<&]*)", token_ids::char_data),
+    m_char_data("[^<&]+", token_ids::char_data),
+    m_cdata(".*", token_ids::char_data),
     m_whitespace("[ \t\n\r]+", token_ids::whitespace),
-    m_comment("<!--(([^-])|([-][^-]))*-->", token_ids::comment)
+    m_comment("(([^-])|([-][^-]))*", token_ids::comment)
   {
     lex::_pass_type _pass;
 
+    // lexer state "INITIAL" while parsing document and element content
     this->self +=
-          m_etag_begin
-        | m_tag_begin
-        | m_tag_end
-        | m_emptyElem_tag_end
+          m_etag_begin [ lex::_state = "ETAG" ]
+        | m_tag_begin [ lex::_state = "ETAG" ]
         | m_etag_mark
         | m_declaration_mark
         | m_equal
-        | m_name
+        | m_cdata_begin_mark [ lex::_state = "CDATA" ]
+        | m_comment_begin_mark [ lex::_state = "COMMENT" ]
+        | m_xml_decl_begin [ lex::_state = "XMLDECL" ]
         | m_char_data
-        | m_comment
+        ;
+
+    // lexer state "ETAG" while parsing element tag
+    this->self("ETAG") +=
+          m_tag_end [ lex::_state = "INITIAL" ]
+        | m_emptyElem_tag_end [ lex::_state = "INITIAL" ]
+        | m_name
         | m_whitespace
+        ;
+
+    // lexer state "XMLDECL" while parsing xml declaration
+//    this->self("XMLDECL") +=
+//          m_xml_decl_end [ lex::_state = "INITIAL" ]
+//        | m_char_data
+//        ;
+
+    // lexer state "CDATA" while parsing cdata section
+    this->self("CDATA") +=
+          m_cdata_end_mark [ lex::_state = "INITIAL" ]
+        | m_cdata
+        ;
+
+    // lexer state "COMMENT" while parsing comment
+    this->self("COMMENT") +=
+          m_comment_end_mark [ lex::_state = "INITIAL" ]
+        | m_comment
         ;
     }
 
