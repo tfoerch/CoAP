@@ -5,12 +5,14 @@
  *      Author: tom
  */
 
+#include <boost/hana/functional/fix.hpp>
+#include <boost/hana/functional/overload.hpp>
+
 #include <map>
 #include <vector>
 #include <iostream>
 #include <sstream>
 #include <variant>
-#include <iterator>
 
 #define BOOST_TEST_MAIN
 #if !defined( WIN32 )
@@ -20,9 +22,12 @@
 
 #define BOOST_TEST_MODULE COAP
 
+namespace hana = boost::hana;
+
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
+// Y_Combinator https://stackoverflow.com/questions/2067988/recursive-lambda-functions-in-c11
 template <class F>
 struct Y_Combinator
 {
@@ -45,7 +50,53 @@ struct Y_Combinator
   }
 };
 
+
+template<typename InputIterator,
+         typename UnaryOperation,
+         typename CharT = char,
+         typename Traits = std::char_traits<CharT>>
+std::basic_ostream<CharT, Traits>&
+PrintOutCB(InputIterator                                 first,
+           InputIterator                                 last,
+           std::basic_ostream<CharT, Traits>&            oStream,
+           const std::basic_string_view<CharT, Traits>&  delim,
+           UnaryOperation                                unary_op)
+{
+  bool firstWritten = false;
+  for (; first != last; ++first)
+  {
+    if (firstWritten)
+    {
+      oStream << delim;
+    }
+    else
+    {
+      firstWritten = true;
+    }
+    unary_op(oStream, *first);
+  }
+  return oStream;
+}
+
 template <class F> Y_Combinator(F) -> Y_Combinator<F>;
+
+template<typename InputIterator,
+         typename CharT = char,
+         typename Traits = std::char_traits<CharT>>
+std::basic_ostream<CharT, Traits>&
+PrintOut(InputIterator                                 first,
+         InputIterator                                 last,
+         std::basic_ostream<CharT, Traits>&            oStream,
+         const std::basic_string_view<CharT, Traits>&  delim)
+{
+  return PrintOutCB(first, last,
+                    oStream,
+                    delim,
+                    [](
+                      std::basic_ostream<CharT, Traits>&  os,
+                      const auto&                         entry)
+                    { os << entry; });
+}
 
 
 namespace impl
@@ -56,13 +107,27 @@ namespace impl
 
 using impl::symbol_arr;
 
-//r0: Expression → Sums eof
-//r1: Sums → Sums + Products
-//r2: Sums → Products
-//r3: Products → Products * Value
-//r4: Products → Value
-//r5: Value → int
-//r6: Value → id
+// grammar https://en.wikipedia.org/wiki/LR_parser
+//rule0: Expression → Sums eof
+//rule1: Sums → Sums + Products
+//rule2: Sums → Products
+//rule3: Products → Products * Value
+//rule4: Products → Value
+//rule5: Value → int
+//rule6: Value → id
+
+// states
+struct StartState {};
+struct SumsParsedState {};
+struct SumsAndPlusParsedState {};
+struct ProductsParsedPotentialShiftRule1State {};
+struct ProductsParsedPotentialShiftRule2State {};
+struct ProductsAndMultiplicationParsedState {};
+struct ValueParsedShiftRule3State {};
+struct ValueParsedShiftRule4State {};
+struct IntParsedShiftRule5State {};
+struct IdParsedShiftRule6State {};
+
 
 // terminal symbols
 using IdType = std::string;
@@ -128,6 +193,18 @@ using TerminalVariantType =
                PlusSign,
                MultiplicationSign,
                EOFSymbol>;
+
+using StateVariantType =
+  std::variant<StartState,
+               SumsParsedState,
+               SumsAndPlusParsedState,
+               ProductsParsedPotentialShiftRule1State,
+               ProductsParsedPotentialShiftRule2State,
+               ProductsAndMultiplicationParsedState,
+               ValueParsedShiftRule3State,
+               ValueParsedShiftRule4State,
+               IntParsedShiftRule5State,
+               IdParsedShiftRule6State>;
 
 using SymbolTable =
   std::map<IdType, IntType>;
@@ -224,14 +301,14 @@ auto evaluate = [](
   const SymbolVariantType&  symbol,
   const SymbolTable&        symbolTable) -> IntType
 {
-  auto do_evaluate = Y_Combinator{[&symbolTable](
+  auto do_evaluate = hana::fix([&symbolTable](
     auto                      self,
     const SymbolVariantType&  symbol) -> IntType
   {
     return
       std::visit(
-        overloaded
-         {
+        hana::overload
+         (
            [&symbolTable](const IdType& id) -> IntType
            {
              IntType result = 0;
@@ -283,18 +360,19 @@ auto evaluate = [](
                ( value.m_symbols.empty() ?
                  0 :
                  impl::visit_recursively(self, value.m_symbols[0]) );
-           },
-         },
+           }
+         ),
          symbol);
-  }};
+  });
   return
     do_evaluate(symbol);
 };
-auto printout = [](
+
+std::ostream& operator<<(
   std::ostream&             os,
-  const SymbolVariantType&  symbol) -> std::ostream&
+  const SymbolVariantType&  symbol)
 {
-  auto do_printout = Y_Combinator{[&os](
+  auto printout = hana::fix([&os](
     auto                      self,
     const SymbolVariantType&  symbol) -> void
   {
@@ -303,25 +381,19 @@ auto printout = [](
       const symbol_arr&  symbols) -> void
     {
       os << "{ ";
-      bool firstWritten = false;
-      for(const auto& symbol : symbols)
-      {
-        if (firstWritten)
-        {
-          os << ", ";
-        }
-        else
-        {
-          firstWritten = true;
-        }
-        impl::visit_recursively(self, symbol);
-      }
+      PrintOutCB(symbols.begin(), symbols.end(),
+                 os,
+                 std::string_view(", "),
+                 [&self](
+                   std::ostream&  os,
+                   const auto&    symbolWrapper)
+                   { impl::visit_recursively(self, symbolWrapper); });
       os << " }";
     };
     return
       std::visit(
-        overloaded
-         {
+        hana::overload
+         (
            [&os](const IdType& id){ os << id; },
            [&os](const IntType& value){ os << value; },
            [&os](const PlusSign& plus){ os << '+'; },
@@ -330,24 +402,53 @@ auto printout = [](
            [&printSeq, &os](const Expression&  expr){ printSeq(os, expr.m_symbols); },
            [&printSeq, &os](const Sums&  sums){ printSeq(os, sums.m_symbols); },
            [&printSeq, &os](const Products&  products){ printSeq(os, products.m_symbols); },
-           [&printSeq, &os](const Value&  value){ printSeq(os, value.m_symbols); },
-         },
+           [&printSeq, &os](const Value&  value){ printSeq(os, value.m_symbols); }
+         ),
          symbol);
-  }};
-  do_printout(symbol);
+  });
+  printout(symbol);
   return os;
-};
+}
 
 std::ostream& operator<<(
-  std::ostream&             os,
-  const SymbolVariantType&  symbol)
+  std::ostream&               os,
+  const TerminalVariantType&  symbol)
 {
-//  std::visit([&os](auto&& arg){os << arg;}, symbol);
-  printout(os, symbol);
+  auto printout = [&os](
+    const TerminalVariantType&  symbol) -> void
+  {
+    return
+      std::visit(
+        hana::overload
+         (
+           [&os](const IdType& id){ os << id; },
+           [&os](const IntType& value){ os << value; },
+           [&os](const PlusSign& plus){ os << '+'; },
+           [&os](const MultiplicationSign& mult){ os << '*'; },
+           [&os](const EOFSymbol& eof){ os << "eof"; }
+         ),
+         symbol);
+  };
+  printout(symbol);
   return os;
 }
 
 BOOST_AUTO_TEST_SUITE( util )
+
+BOOST_AUTO_TEST_CASE( print_not_recursive_variant )
+{
+  using TerminalInitList =
+    std::initializer_list<TerminalVariantType>;
+  const TerminalInitList input =
+    { IdType{"a"}, MultiplicationSign{}, IntType{2}, PlusSign{}, IntType{1}, EOFSymbol{} };// a*2 + 1
+  std::ostringstream oss;
+  oss << "{ ";
+  PrintOut(input.begin(), input.end(),
+             oss,
+             std::string_view(", "));
+  oss << " }";
+  BOOST_CHECK_EQUAL(oss.str(), "{ a, *, 2, +, 1, eof }");
+}
 
 BOOST_AUTO_TEST_CASE( print_recursive_variant )
 {
