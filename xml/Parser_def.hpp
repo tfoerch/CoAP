@@ -9,7 +9,7 @@
 
 #include "Parser.hpp"
 #include "ErrorHandler.hpp"
-#include "TokenStringValueLiteral.hpp"
+//#include "TokenStringValueLiteral.hpp"
 #include "Annotation.hpp"
 
 #include <boost/spirit/include/qi.hpp>
@@ -28,19 +28,12 @@ namespace xml
     namespace phoenix = boost::phoenix;
 
 
-    template <typename Iterator, typename Lexer>
-    element<Iterator, Lexer>::element(
-      error_handler<typename Lexer::base_iterator_type, Iterator>& error_handler,
-      Lexer const& l)
+    template <typename Iterator>
+    template <typename Token>
+    element<Iterator>::element(
+      const Token& tokens)
     : element::base_type(m_element, "element")
     {
-      qi::_1_type _1;
-      qi::_2_type _2;
-      qi::_3_type _3;
-      qi::_4_type _4;
-
-      qi::_val_type _val;
-
       using namespace qi::labels;
 
       using qi::debug;
@@ -50,51 +43,56 @@ namespace xml
       using qi::on_success;
       using qi::fail;
       using phoenix::at_c;
-      using boost::phoenix::function;
+      using phoenix::val;
+//      using boost::phoenix::function;
 
-      typedef xml::error_handler<typename Lexer::base_iterator_type, Iterator>
-        error_handler_type;
-      typedef function<error_handler_type> error_handler_function;
-      typedef function<xml::annotation<Iterator> > annotation_function;
+//      typedef xml::error_handler<typename Lexer::base_iterator_type, Iterator>
+//        error_handler_type;
+//      typedef function<error_handler_type> error_handler_function;
+//      typedef function<xml::annotation<Iterator> > annotation_function;
 
       m_char_data =
-              l.m_char_data [ at_c<0>(_val) = _1 ]
+          // qi::token(token_ids::char_data) [ at_c<0>(_val) = _1 ]
+          tokens.m_char_data [ at_c<0>(_val) = _1 ]
           ;
 
+#if 0
       m_comment =
-          l.m_comment_begin_mark
-          >   // qi::in_state("COMMENT")
-              // [
-                 // the lexer is in the 'ETAG' state during
-                 // matching of the following parser components
-                      l.m_comment [ at_c<0>(_val) = _1 ]
-                 >>   l.m_comment_end_mark
-              // ]
-
+          // qi::token(token_ids::comment_begin_mark)
+          tokens.m_comment_begin_mark
+          // > qi::token(token_ids::comment) [ at_c<0>(_val) = _1 ]
+          >  tokens.m_comment [ at_c<0>(_val) = _1 ]
+          // >>  qi::token(token_ids::comment_end_mark)
+          >> tokens.m_comment_end_mark
           ;
+#endif
 
       m_start_tag_prefix %=
-              l.m_tag_begin
-          >>  !( l.m_etag_mark |
-                 l.m_declaration_mark )
+          // qi::token(token_ids::tag_begin)
+          tokens.m_tag_begin
+          >>  !( /* tokens.m_etag_mark */ qi::token(token_ids::etag_mark) |
+                 /* tokens.m_declaration_mark */ qi::token(token_ids::declaration_mark) )
           >   // qi::in_state("ETAG")
               // [
                  // the lexer is in the 'ETAG' state during
                  // matching of the following parser components
-                 l.m_name
-              // ]
-      ;
+          // qi::token(token_ids::name)
+          tokens.m_name
+             // ]
+          ;
 
       m_end_tag =
-              l.m_etag_begin
-          >   l.m_name [boost::spirit::_a = _1]
+          // qi::token(token_ids::etag_begin)
+          tokens.m_etag_begin
+          >   tokens.m_name /* qi::token(token_ids::name) */ [boost::spirit::_a = _1]
           >   eps(boost::spirit::_a == boost::spirit::_r1) // same name as in start_tag
-          >   l.m_tag_end
+          >   tokens.m_tag_end_TAG /* qi::token(token_ids::tag_end) */
           ;
 
       m_markup_content %=
-          (   m_element |
-              m_comment )
+          m_element
+//          (   m_element |
+//              m_comment )
           >>  -m_char_data
           ;
 
@@ -104,12 +102,14 @@ namespace xml
           ;
 
       m_empty_element %=
-              l.m_emptyElem_tag_end
+          // qi::token(token_ids::emptyElem_tag_end)
+          tokens.m_emptyElem_tag_end_TAG
           > attr(ast::Content())
           ;
 
       m_element_with_content %=
-              l.m_tag_end
+          // qi::token(token_ids::tag_end)
+          tokens.m_tag_end_TAG
           >   m_content
           >   m_end_tag(boost::spirit::_r1)
           ;
@@ -127,12 +127,12 @@ namespace xml
       m_markup_content.name("markup_content");
       m_start_tag_prefix.name("start_tag_prefix");
       m_end_tag.name("end_tag");
-      m_char_data.name("char_data");
-      m_comment.name("comment");
+//      m_char_data.name("char_data");
+//      m_comment.name("comment");
       // Debugging and error handling and reporting support.
       BOOST_SPIRIT_DEBUG_NODES(
-          (m_char_data)
-          (m_comment)
+//          (m_char_data)
+//          (m_comment)
           (m_start_tag_prefix)
           (m_end_tag)
           (m_content)
@@ -148,12 +148,12 @@ namespace xml
       debug(m_content);
       debug(m_end_tag);
       debug(m_start_tag_prefix);
-      debug(m_comment);
-      debug(m_char_data);
+//      debug(m_comment);
+//      debug(m_char_data);
       // Error handling: on error in start, call error_handler.
-      on_error<fail>(m_element,
-                     error_handler_function(error_handler)(
-                         "Error! Expecting ", _4, _3));
+//      on_error<fail>(m_element,
+//                     error_handler_function(error_handler)(
+//                         "Error! Expecting ", _4, _3));
 
         // Annotation: on success in start, call annotation.
 //        on_success(m_element,

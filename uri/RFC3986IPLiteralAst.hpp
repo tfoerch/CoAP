@@ -7,17 +7,16 @@
  *      Author: tom
  */
 
-#include <boost/cstdint.hpp>
-#include <boost/asio/detail/array.hpp>
-#include <boost/variant.hpp>
+#include <array>
+#include <variant>
 #include <string>
 
 namespace rfc3986
 {
   namespace ast
   {
-    typedef boost::asio::detail::array<unsigned char, 16> byte_array16;
-    typedef boost::variant<byte_array16, std::string>  IPLiteral;
+    typedef std::array<unsigned char, 16>            byte_array16;
+    typedef std::variant<byte_array16, std::string>  IPLiteral;
   } // namespace ast
 } // namespace rfc3986
 

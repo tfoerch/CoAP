@@ -10,7 +10,7 @@
 #include "uri/RFC3986UnreservedParser.hpp"
 #include "uri/RFC3986SubDelimsParser.hpp"
 #include <boost/spirit/include/qi.hpp>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <string>
 
 namespace rfc3986

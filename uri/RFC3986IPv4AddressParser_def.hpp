@@ -8,11 +8,11 @@
  */
 
 #include "uri/RFC3986IPv4AddressParser.hpp"
-#if defined(BOOST_ASIO_HAS_STD_ARRAY)
+//#if defined(BOOST_ASIO_HAS_STD_ARRAY)
 #include <boost/fusion/adapted/std_array.hpp>
-#else // defined(BOOST_ASIO_HAS_STD_ARRAY)
-#include <boost/fusion/adapted/boost_array.hpp>
-#endif // defined(BOOST_ASIO_HAS_STD_ARRAY)
+//#else // defined(BOOST_ASIO_HAS_STD_ARRAY)
+//#include <boost/fusion/adapted/boost_array.hpp>
+//#endif // defined(BOOST_ASIO_HAS_STD_ARRAY)
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
@@ -21,7 +21,7 @@
 
 namespace boost { namespace spirit { namespace traits {
     template <typename T, size_t N>
-        struct is_container<boost::asio::detail::array<T, N>, void> : mpl::false_ { };
+        struct is_container<std::array<T, N>, void> : mpl::false_ { };
 } } }
 
 namespace rfc3986
@@ -39,15 +39,15 @@ namespace rfc3986
   //                        / "2" %x30-34 DIGIT     ; 200-249
   //                        / "25" %x30-35          ; 250-255
 
-  template <boost::uint8_t  numLeftShift>
+  template <std::uint16_t  numLeftShift>
   struct ShiftByte
   {
-    template<typename> struct result { typedef boost::uint32_t type; };
-    boost::uint32_t operator()(
-      const boost::uint8_t& byte) const
+    template<typename> struct result { typedef std::uint32_t type; };
+    std::uint32_t operator()(
+      const std::uint16_t& byte) const
     {
       return
-        ( static_cast<boost::uint32_t>(byte) << numLeftShift );
+        ( static_cast<std::uint32_t>(byte) << numLeftShift );
     }
   };
 
@@ -67,13 +67,13 @@ namespace rfc3986
     boost::phoenix::function<ShiftByte<0>>       phx_noleftshift;
 
     ipv4_address_rule %=
-           qi::uint_parser<boost::uint8_t, 10, 1, 3>() //[ _val = phx_leftshift24(_1) ]
+           qi::uint_parser<std::uint8_t, 10, 1, 3>() //[ _val = phx_leftshift24(_1) ]
         >> '.'
-        > qi::uint_parser<boost::uint8_t, 10, 1, 3>() //[ _val += phx_leftshift16(_1) ]
+        > qi::uint_parser<std::uint8_t, 10, 1, 3>() //[ _val += phx_leftshift16(_1) ]
         >> '.'
-        > qi::uint_parser<boost::uint8_t, 10, 1, 3>() //[ _val += phx_leftshift8(_1) ]
+        > qi::uint_parser<std::uint8_t, 10, 1, 3>() //[ _val += phx_leftshift8(_1) ]
         >> '.'
-        > qi::uint_parser<boost::uint8_t, 10, 1, 3>() //[ _val += phx_noleftshift(_1) ]
+        > qi::uint_parser<std::uint8_t, 10, 1, 3>() //[ _val += phx_noleftshift(_1) ]
         ;
 
     ipv4_address_rule.name("ipv4_address");

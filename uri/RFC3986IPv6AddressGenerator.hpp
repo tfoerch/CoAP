@@ -7,11 +7,11 @@
  *      Author: tom
  */
 
-#include <boost/asio/detail/array.hpp>
+#include <array>
 #include <boost/icl/discrete_interval.hpp>
 #include <boost/spirit/include/karma.hpp>
-#include <boost/optional.hpp>
-#include <boost/cstdint.hpp>
+#include <optional>
+#include <cstdint>
 
 #include <vector>
 
@@ -21,7 +21,7 @@ namespace rfc3986
   {
     namespace karma = boost::spirit::karma;
     namespace icl = boost::icl;
-    typedef boost::asio::detail::array<unsigned char, 16> byte_array16;
+    typedef std::array<unsigned char, 16> byte_array16;
 
     template <typename OutputIterator>
     struct ipv6_address_grammar : karma::grammar<OutputIterator, byte_array16(), karma::locals<byte_array16::const_iterator> >
@@ -29,7 +29,7 @@ namespace rfc3986
       ipv6_address_grammar();
 
       karma::rule<OutputIterator, byte_array16(), karma::locals<byte_array16::const_iterator> >  ipv6_address_rule;
-      karma::rule<OutputIterator, std::vector<boost::uint16_t>, karma::locals<size_t>, karma::locals<boost::optional<icl::discrete_interval<size_t> > > >  shortIntSeq_rule;
+      karma::rule<OutputIterator, std::vector<std::uint16_t>, karma::locals<size_t>, karma::locals<std::optional<icl::discrete_interval<size_t> > > >  shortIntSeq_rule;
     };
   } // namespace generator
 } // namespace rfc3986

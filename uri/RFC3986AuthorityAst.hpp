@@ -8,17 +8,16 @@
  */
 
 #include "uri/RFC3986HostAst.hpp"
-#include <boost/cstdint.hpp>
-#include <boost/asio/detail/array.hpp>
-#include <boost/optional.hpp>
+#include <cstdint>
+#include <optional>
 #include <string>
 
 namespace rfc3986
 {
   namespace ast
   {
-    typedef boost::optional<std::string>      OptString;
-    typedef boost::optional<boost::uint16_t>  OptUShort;
+    typedef std::optional<std::string>    OptString;
+    typedef std::optional<std::uint16_t>  OptUShort;
     struct Authority
     {
       OptString  m_userInfo;

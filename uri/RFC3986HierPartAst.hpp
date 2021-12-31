@@ -23,11 +23,11 @@ namespace rfc3986
       Authority     m_authority;
       PathAbEmpty   m_pathAbEmpty;
     };
-    typedef
+    using HierPart =
       boost::variant<AuthorityAndPathAbEmpty,
                      PathAbsolute,
                      PathRootLess,
-                     PathEmpty>  HierPart;
+                     PathEmpty>;
   } // namespace ast
 } // namespace rfc3986
 

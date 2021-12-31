@@ -8,22 +8,21 @@
  */
 
 #include "RFC3986IPv6AddressGenerator.hpp"
-#if defined(BOOST_ASIO_HAS_STD_ARRAY)
+//#if defined(BOOST_ASIO_HAS_STD_ARRAY)
 #include <boost/fusion/adapted/std_array.hpp>
-#else // defined(BOOST_ASIO_HAS_STD_ARRAY)
-#include <boost/fusion/adapted/boost_array.hpp>
-#endif // defined(BOOST_ASIO_HAS_STD_ARRAY)
+//#else // defined(BOOST_ASIO_HAS_STD_ARRAY)
+//#include <boost/fusion/adapted/boost_array.hpp>
+//#endif // defined(BOOST_ASIO_HAS_STD_ARRAY)
 #include <boost/icl/closed_interval.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/phoenix/object/static_cast.hpp>
-#include <boost/optional/optional_io.hpp>
 
 namespace boost { namespace spirit { namespace traits {
     template <typename T, size_t N>
-        struct is_container<boost::asio::detail::array<T, N>, void> : mpl::false_ { };
+        struct is_container<std::array<T, N>, void> : mpl::false_ { };
 } } }
 
 
@@ -38,11 +37,11 @@ namespace rfc3986
     {
       template<typename> struct result { typedef bool /*boost::optional<icl::discrete_interval<size_t> >*/ type; };
       bool /*boost::optional<icl::discrete_interval<size_t> >*/ operator()(
-        const std::vector<boost::uint16_t>&  value,
+        const std::vector<std::uint16_t>&  value,
         size_t                               index) const
       {
-        boost::optional<icl::discrete_interval<size_t> > result;
-        boost::optional<icl::discrete_interval<size_t> > cur_interval;
+        std::optional<icl::discrete_interval<size_t> > result;
+        std::optional<icl::discrete_interval<size_t> > cur_interval;
         for (size_t index = 0; index < value.size(); ++index)
         {
           if (value[index] == 0)
@@ -75,7 +74,7 @@ namespace rfc3986
           }
           cur_interval.reset();
         }
-        std::cout << result << ", " << index << std::endl;
+        //std::cout << result << ", " << index << std::endl;
         return
           ( result &&
             icl::contains(*result, index) );
@@ -98,23 +97,23 @@ namespace rfc3986
       ipv6_address_rule =
 //             eps [ karma::_a = phoenix::begin(_val) ]
 //          << karma::repeat(7) [
-//                karma::uint_generator<boost::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
+//                karma::uint_generator<std::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
 //             << ':' ]
-//         << karma::uint_generator<boost::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
+//         << karma::uint_generator<std::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
 //         << ':'
-//         << karma::uint_generator<boost::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
+//         << karma::uint_generator<std::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
 //         << ':'
-//         << karma::uint_generator<boost::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
+//         << karma::uint_generator<std::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
 //         << ':'
-//         << karma::uint_generator<boost::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
+//         << karma::uint_generator<std::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
 //         << ':'
-//         << karma::uint_generator<boost::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
+//         << karma::uint_generator<std::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
 //         << ':'
-//         << karma::uint_generator<boost::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
+//         << karma::uint_generator<std::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
 //         << ':'
-//         << karma::uint_generator<boost::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
+//         << karma::uint_generator<std::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
 //         << ':'
-//         << karma::uint_generator<boost::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
+//         << karma::uint_generator<std::uint16_t, 16>() [ _1 = (256 * *karma::_a++) + *karma::_a++ ]
          shortIntSeq_rule [ karma::_a = phoenix::begin(_val),
                             push_back(_1, (256 * *karma::_a++) + *karma::_a++), push_back(_1, (256 * *karma::_a++) + *karma::_a++),
                             push_back(_1, (256 * *karma::_a++) + *karma::_a++), push_back(_1, (256 * *karma::_a++) + *karma::_a++),
@@ -125,17 +124,17 @@ namespace rfc3986
       shortIntSeq_rule %=
 //         eps [ karma::_a = 0 ]
 //         << (    eps(!phx_is_in_longest_zero_interval(_val, karma::_a))
-//              << omit[karma::uint_generator<boost::uint16_t, 16>()]
+//              << omit[karma::uint_generator<std::uint16_t, 16>()]
 //              << "::"
 //              << +(    ':'
-//                    << karma::uint_generator<boost::uint16_t, 16>() ) ) |
-//            ( karma::uint_generator<boost::uint16_t, 16>()
+//                    << karma::uint_generator<std::uint16_t, 16>() ) ) |
+//            ( karma::uint_generator<std::uint16_t, 16>()
 //              << +(    ':'
-//                    << karma::uint_generator<boost::uint16_t, 16>() ) )
-         karma::uint_generator<boost::uint16_t, 16>()
+//                    << karma::uint_generator<std::uint16_t, 16>() ) )
+         karma::uint_generator<std::uint16_t, 16>()
          << karma::repeat(7) [
                ':'
-            << karma::uint_generator<boost::uint16_t, 16>() ]
+            << karma::uint_generator<std::uint16_t, 16>() ]
          ;
 
       ipv6_address_rule.name("ipv6_address");

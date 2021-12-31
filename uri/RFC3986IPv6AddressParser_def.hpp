@@ -8,11 +8,11 @@
  */
 
 #include "uri/RFC3986IPv6AddressParser.hpp"
-#if defined(BOOST_ASIO_HAS_STD_ARRAY)
+//#if defined(BOOST_ASIO_HAS_STD_ARRAY)
 #include <boost/fusion/adapted/std_array.hpp>
-#else // defined(BOOST_ASIO_HAS_STD_ARRAY)
-#include <boost/fusion/adapted/boost_array.hpp>
-#endif // defined(BOOST_ASIO_HAS_STD_ARRAY)
+//#else // defined(BOOST_ASIO_HAS_STD_ARRAY)
+//#include <boost/fusion/adapted/boost_array.hpp>
+//#endif // defined(BOOST_ASIO_HAS_STD_ARRAY)
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
@@ -21,7 +21,7 @@
 
 namespace boost { namespace spirit { namespace traits {
     template <typename T, size_t N>
-        struct is_container<boost::asio::detail::array<T, N>, void> : mpl::false_ { };
+        struct is_container<std::array<T, N>, void> : mpl::false_ { };
 } } }
 
 namespace rfc3986
@@ -48,21 +48,21 @@ namespace rfc3986
 
   struct getHighByte
   {
-    template<typename> struct result { typedef boost::uint8_t type; };
-    boost::uint8_t operator()(
-      const boost::uint16_t&  value) const
+    template<typename> struct result { typedef std::uint16_t type; };
+    std::uint16_t operator()(
+      const std::uint16_t&  value) const
     {
-      return static_cast<boost::uint8_t>(value >> 8);
+      return static_cast<std::uint16_t>(value >> 8);
     }
   };
 
   struct getLowByte
   {
-    template<typename> struct result { typedef boost::uint8_t type; };
-    boost::uint8_t operator()(
-      const boost::uint16_t&  value) const
+    template<typename> struct result { typedef std::uint16_t type; };
+    std::uint16_t operator()(
+      const std::uint16_t&  value) const
     {
-      return static_cast<boost::uint8_t>(value & std::numeric_limits<boost::uint8_t>::max());
+      return static_cast<std::uint16_t>(value & std::numeric_limits<std::uint16_t>::max());
     }
   };
 
@@ -237,7 +237,7 @@ namespace rfc3986
     //h16         = 1*4HEXDIG
     //            ; 16 bits of address represented in hexadecimal
     hex_16bits_rule =
-        qi::uint_parser<boost::uint16_t, 16, 1, 4>() [ at_c<0>(_val) = phx_get_high_byte(_1), at_c<1>(_val) = phx_get_low_byte(_1) ]
+        qi::uint_parser<std::uint16_t, 16, 1, 4>() [ at_c<0>(_val) = phx_get_high_byte(_1), at_c<1>(_val) = phx_get_low_byte(_1) ]
         ;
 
 

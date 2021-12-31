@@ -8,7 +8,7 @@
  */
 
 #include <boost/spirit/include/qi.hpp>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 namespace rfc3986
 {

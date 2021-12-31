@@ -8,7 +8,7 @@ include_directories ("${PROJECT_SOURCE_DIR}/base/test")
 #set(BOOST_LIBRARYDIR "${BOOST_ROOT}/g++/lib")
 #endif(USE_CLANG)
 
-find_package(Boost COMPONENTS unit_test_framework timer chrono system)
+find_package(Boost COMPONENTS unit_test_framework)
 enable_testing()
 add_executable (BaseUnitTest_T BaseUnitTest.cpp)
 

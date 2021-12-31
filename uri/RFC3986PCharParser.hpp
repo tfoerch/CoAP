@@ -11,7 +11,7 @@
 #include "uri/RFC3986PercentEncodedParser.hpp"
 #include "uri/RFC3986SubDelimsParser.hpp"
 #include <boost/spirit/include/qi.hpp>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 namespace rfc3986
 {

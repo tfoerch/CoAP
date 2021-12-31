@@ -9,7 +9,7 @@
 
 #include "uri/RFC3986PCharParser.hpp"
 #include <boost/spirit/include/qi.hpp>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <string>
 
 namespace rfc3986

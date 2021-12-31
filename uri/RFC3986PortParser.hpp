@@ -8,19 +8,19 @@
  */
 
 #include <boost/spirit/include/qi.hpp>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 namespace rfc3986
 {
   namespace qi = boost::spirit::qi;
 
   template < typename Iterator >
-  struct port_grammar : qi::grammar< Iterator, boost::uint16_t()>
+  struct port_grammar : qi::grammar< Iterator, std::uint16_t()>
   {
 
     port_grammar();
 
-    qi::rule<Iterator, boost::uint16_t()>  port_rule;
+    qi::rule<Iterator, std::uint16_t()>  port_rule;
   };
 } // rfc3986
 #endif /* COAP_RFC3986Port_PARSER_HPP_ */

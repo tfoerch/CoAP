@@ -38,7 +38,7 @@ namespace rfc3986
     //percent_encoded  = ALPHA / DIGIT / "-" / "." / "_" / "~"
     percent_encoded_rule %=
            '%'
-        >> qi::uint_parser<boost::uint8_t, 16, 2, 2>()
+        >> qi::uint_parser<std::uint8_t, 16, 2, 2>()
         ;
 
     percent_encoded_rule.name("percent_encoded");

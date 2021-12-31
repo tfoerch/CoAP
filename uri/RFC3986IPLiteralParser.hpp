@@ -11,7 +11,7 @@
 #include "uri/RFC3986IPv6AddressParser.hpp"
 #include "uri/RFC3986IPvFutureParser.hpp"
 #include <boost/spirit/include/qi.hpp>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <string>
 
 
@@ -26,8 +26,8 @@ namespace rfc3986
     ipliteral_grammar();
 
     qi::rule<Iterator, ast::IPLiteral()>  ipliteral_rule;
-    ipv6_address_grammar<Iterator>     ipv6_address;
-    ipvfuture_grammar<Iterator>        ipvfuture;
+    ipv6_address_grammar<Iterator>        ipv6_address;
+    ipvfuture_grammar<Iterator>           ipvfuture;
   };
 } // rfc3986
 #endif /* COAP_RFC3986IPLiteral_PARSER_HPP_ */

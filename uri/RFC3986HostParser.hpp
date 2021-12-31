@@ -12,7 +12,7 @@
 #include "uri/RFC3986IPv4AddressParser.hpp"
 #include "uri/RFC3986RegNameParser.hpp"
 #include <boost/spirit/include/qi.hpp>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <string>
 
 

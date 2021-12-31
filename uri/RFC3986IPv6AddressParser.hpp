@@ -8,27 +8,27 @@
  */
 
 #include "uri/RFC3986IPv4AddressParser.hpp"
-#include <boost/asio/detail/array.hpp>
+#include <array>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 
 namespace rfc3986
 {
   namespace qi = boost::spirit::qi;
 
-  typedef boost::asio::detail::array<unsigned char, 16> byte_array16;
+  typedef std::array<unsigned char, 16> byte_array16;
 
   template < typename Iterator >
   struct ipv6_address_grammar : qi::grammar< Iterator, byte_array16(), qi::locals<byte_array16::iterator> >
   {
-    typedef boost::asio::detail::array<unsigned char, 2> byte_array2;
-    typedef boost::asio::detail::array<unsigned char, 4> byte_array4;
-    typedef boost::asio::detail::array<unsigned char, 6> byte_array6;
-    typedef boost::asio::detail::array<unsigned char, 8> byte_array8;
-    typedef boost::asio::detail::array<unsigned char, 10> byte_array10;
-    typedef boost::asio::detail::array<unsigned char, 12> byte_array12;
-    typedef boost::asio::detail::array<unsigned char, 14> byte_array14;
+    typedef std::array<unsigned char, 2> byte_array2;
+    typedef std::array<unsigned char, 4> byte_array4;
+    typedef std::array<unsigned char, 6> byte_array6;
+    typedef std::array<unsigned char, 8> byte_array8;
+    typedef std::array<unsigned char, 10> byte_array10;
+    typedef std::array<unsigned char, 12> byte_array12;
+    typedef std::array<unsigned char, 14> byte_array14;
 
     ipv6_address_grammar();
 

@@ -7,14 +7,17 @@
  *      Author: tom
  */
 
+#include <boost/spirit/include/lex_lexer.hpp>
+
 namespace xml
 {
+  namespace lex = boost::spirit::lex;
+
   struct token_ids
   {
     enum type
     {
-      invalid,
-      etag_begin,
+      etag_begin = lex::tokenids::min_token_id + 1,
       tag_begin,
       emptyElem_tag_end,
       tag_end,

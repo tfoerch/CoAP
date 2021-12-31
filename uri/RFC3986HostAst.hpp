@@ -8,17 +8,16 @@
  */
 
 #include "uri/RFC3986IPLiteralAst.hpp"
-#include <boost/cstdint.hpp>
-#include <boost/asio/detail/array.hpp>
-#include <boost/variant.hpp>
+#include <array>
+#include <variant>
 #include <string>
 
 namespace rfc3986
 {
   namespace ast
   {
-    typedef boost::asio::detail::array<unsigned char, 4> byte_array4;
-    typedef boost::variant<IPLiteral, byte_array4, std::string>  Host;
+    typedef std::array<unsigned char, 4> byte_array4;
+    typedef std::variant<IPLiteral, byte_array4, std::string>  Host;
   } // namespace ast
 } // namespace rfc3986
 

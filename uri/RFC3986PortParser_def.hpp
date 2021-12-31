@@ -36,7 +36,7 @@ namespace rfc3986
 
     //reg-name    = *( unreserved / pct-encoded / sub-delims )
     port_rule %=
-        ( qi::uint_parser<boost::uint16_t, 10, 1, 5>() |
+        ( qi::uint_parser<std::uint16_t, 10, 1, 5>() |
           eps [ _val = 0 ] )
         ;
 

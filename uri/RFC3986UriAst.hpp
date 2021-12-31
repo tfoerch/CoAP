@@ -8,14 +8,14 @@
  */
 
 #include "uri/RFC3986HierPartAst.hpp"
-#include <boost/optional.hpp>
+#include <optional>
 #include <string>
 
 namespace rfc3986
 {
   namespace ast
   {
-    typedef boost::optional<std::string>      OptString;
+    typedef std::optional<std::string>      OptString;
     struct Uri
     {
       std::string  m_scheme;

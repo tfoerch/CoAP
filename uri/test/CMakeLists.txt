@@ -8,7 +8,7 @@ include_directories ("${PROJECT_SOURCE_DIR}/uri/test")
 #set(BOOST_LIBRARYDIR "${BOOST_ROOT}/g++/lib")
 #endif(USE_CLANG)
 
-find_package(Boost COMPONENTS unit_test_framework system)
+find_package(Boost COMPONENTS unit_test_framework)
 find_package(ICU COMPONENTS data i18n io uc tu -le-hb test)
 enable_testing()
 add_executable (URIUnitTest_T URIUnitTest.cpp)

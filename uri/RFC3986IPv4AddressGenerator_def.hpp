@@ -8,11 +8,11 @@
  */
 
 #include "RFC3986IPv4AddressGenerator.hpp"
-#if defined(BOOST_ASIO_HAS_STD_ARRAY)
+//#if defined(BOOST_ASIO_HAS_STD_ARRAY)
 #include <boost/fusion/adapted/std_array.hpp>
-#else // defined(BOOST_ASIO_HAS_STD_ARRAY)
-#include <boost/fusion/adapted/boost_array.hpp>
-#endif // defined(BOOST_ASIO_HAS_STD_ARRAY)
+//#else // defined(BOOST_ASIO_HAS_STD_ARRAY)
+//#include <boost/fusion/adapted/boost_array.hpp>
+//#endif // defined(BOOST_ASIO_HAS_STD_ARRAY)
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
@@ -21,7 +21,7 @@
 
 namespace boost { namespace spirit { namespace traits {
     template <typename T, size_t N>
-        struct is_container<boost::asio::detail::array<T, N>, void> : mpl::false_ { };
+        struct is_container<std::array<T, N>, void> : mpl::false_ { };
 } } }
 
 
@@ -39,13 +39,13 @@ namespace rfc3986
       using phoenix::at_c;
 
       ipv4_address_rule %=
-             karma::uint_generator<boost::uint8_t, 10>()
+             karma::uint_generator<std::uint8_t, 10>()
           << '.'
-          << karma::uint_generator<boost::uint8_t, 10>()
+          << karma::uint_generator<std::uint8_t, 10>()
           << '.'
-          << karma::uint_generator<boost::uint8_t, 10>()
+          << karma::uint_generator<std::uint8_t, 10>()
           << '.'
-          << karma::uint_generator<boost::uint8_t, 10>()
+          << karma::uint_generator<std::uint8_t, 10>()
           ;
 
       ipv4_address_rule.name("ipv4_address");

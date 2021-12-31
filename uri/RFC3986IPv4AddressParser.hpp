@@ -8,14 +8,14 @@
  */
 
 
-#include <boost/asio/detail/array.hpp>
+#include <array>
 #include <boost/spirit/include/qi.hpp>
 
 namespace rfc3986
 {
   namespace qi = boost::spirit::qi;
 
-  typedef boost::asio::detail::array<unsigned char, 4> byte_array4;
+  typedef std::array<unsigned char, 4> byte_array4;
 
   template < typename Iterator >
   struct ipv4_address_grammar : qi::grammar< Iterator, byte_array4() >
