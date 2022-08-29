@@ -1,0 +1,3 @@
+add_executable(ControlChannelFSMOnHSM ControlChannelFSM.cpp)
+
+add_executable(fill_dispatch_table_benchmark fill_dispatch_table_benchmark.cpp)

@@ -5,15 +5,22 @@
  *      Author: tom
  */
 
+#include <FSM.hpp>
+
 #include <boost/hana/functional/fix.hpp>
 #include <boost/hana/functional/overload.hpp>
 
 #include <map>
 #include <vector>
+#include <any>
 #include <iostream>
 #include <sstream>
 #include <variant>
 #include <memory>
+#include <concepts>
+#include <iterator>
+#include <algorithm>
+#include <utility>
 
 #define BOOST_TEST_MAIN
 #if !defined( WIN32 )
@@ -810,8 +817,492 @@ namespace recursive_variant_unique_ptr
   }
 }
 
+template <std::input_iterator InputIt, std::predicate<typename std::iterator_traits<InputIt>::value_type> UnaryPredicate>
+InputIt my_find_if( InputIt first, InputIt last, UnaryPredicate pred)
+{
+  while (first != last && !pred(*first))
+  ++first;
+  return first;
+}
+
+
+
+
+
+#if 0
+template <typename...>
+struct transition;
+
+template <class>
+struct state;
+template <class>
+struct event;
+
+template <class TState>
+struct state_impl
+{
+  template <class E>
+  auto operator+(const E& e) const
+  {
+    return transition<TState, event<E>>{static_cast<const TState &>(*this), e};
+  }
+};
+
+template <class TState>
+struct state : state_impl<state<TState>>
+{
+  using type = TState;
+  template <class T>
+  auto operator=(const T &t) const {
+    return transition<T, state>{t, *this};
+  }
+};
+
+template <class, class>
+struct transition_eg;
+template <class, class>
+struct transition_ea;
+
+template <class TEvent>
+struct event
+{
+  template <typename Fn, typename... Args, std::predicate<Fn, Args...> Predicate>
+  auto operator[](const Predicate& t) const {
+    return transition_eg<event, std::reference_wrapper<const Predicate> >{*this, std::cref(t)};
+  }
+  template <typename Fn, typename... Args, std::invocable<Fn, Args...> Invocable>
+  auto operator/(const Invocable &t) const {
+    return transition_ea<event, std::reference_wrapper<Invocable>>{*this, std::ref(t)};
+  }
+  auto operator()() const { return TEvent{}; }
+};
+
+template <class E, class G>
+struct transition_eg<event<E>, G>
+{
+  template <class T>
+  auto operator/(const T &t) const
+  {
+    return transition<event<E>, G, std::reference_wrapper<T>>{e, g, std::ref<T>(t)};
+  }
+  event<E> e;
+  G g;
+};
+
+template <class S2, class E>
+struct transition<state<S2>, event<E>>
+{
+  template <class S1>
+  auto operator=(const S1&) const
+  {
+    return transition<state<S1>, state<S2>, event<E>>{};
+  }
+  const state<S2>& s2;
+  event<E> e;
+};
+
+template <class S1, class S2, class E>
+struct transition<state<S1>, state<S2>, event<E>>
+{
+//  static constexpr auto initial = state<S2>::initial;
+  using src_state = typename state<S2>::type;
+  using dst_state = typename state<S1>::type;
+  using event = E;
+};
+
+template <class S1, class S2, class E, class G, class A>
+struct transition<state<S1>, state<S2>, event<E>, G, A>
+{
+  static constexpr auto initial = state<S2>::initial;
+  static constexpr auto history = state<S2>::history;
+  using src_state = typename state<S2>::type;
+  using dst_state = typename state<S1>::type;
+  using event = E;
+  using guard = G;
+  using action = A;
+};
+#endif
+
+template <std::size_t  dimension>
+using Coordinate = std::array<double, dimension>;
+
+using Coordinate2D = Coordinate<2>;
+
+class Circle
+{
+public:
+  double        radius;
+  Coordinate2D  position;
+  void draw() const
+  {}
+  bool operator<(
+    const Circle& other) const;
+};
+
+class Square
+{
+public:
+  double        sideLength;
+  Coordinate2D  position;
+  void draw() const
+  {}
+  bool operator<(
+    const Square& other) const;
+};
+namespace shape_impl {
+  void draw(const Circle&  circle)
+  {}
+  void draw(const Square&  square)
+  {}
+}
+
+class Shape
+{
+public:
+  template <std::copy_constructible T>
+  Shape(T&&  shape)
+  : m_storage(std::forward<T>(shape)),
+    m_drawFunction(std::bind(&std::decay_t<T>::draw, std::any_cast<T&>(m_storage)))
+  {}
+//  template <std::copy_constructible T>
+//  Shape(const T&  shape)
+//  : m_storage(std::move(T(shape))),
+//    m_drawFunction(std::bind(&()::draw, std::any_cast<T&>(m_storage)))
+//  {}
+
+  void draw(/* ...*/) const
+  {
+    m_drawFunction();
+  }
+private:
+  std::any               m_storage;
+  std::function<void()>  m_drawFunction;
+};
+
+#if 0
+class Shape
+{
+private:
+  class ShapeConcept;
+  using ShapePtr = std::unique_ptr<ShapeConcept>;
+  class LessThanOneOpFtorIF
+  {
+  public:
+    virtual ~LessThanOneOpFtorIF() = default;
+    bool operator()(
+      const LessThanOneOpFtorIF& other) const;
+  };
+  class ShapeConcept
+  {
+  public:
+    virtual ~ShapeConcept() = default;
+    virtual void draw(/* ...*/) const = 0;
+    virtual ShapePtr clone() const = 0;
+    virtual bool operator<(
+      const ShapeConcept& other) const = 0;
+  };
+  template <typename T>
+  struct LessThanFirstOpFtor : public LessThanOneOpFtorIF
+  {
+    bool operator()(
+      const LessThanOneOpFtorIF& other) const override
+    {
+      lessThan(first, other);
+    }
+    const T& first;
+  };
+
+  template <typename T>
+  class ShapeModel : public ShapeConcept
+  {
+  public:
+    ShapeModel(T&&  shape)
+    : m_shape(std::forward<T>(shape))
+    {}
+    void draw(/* ...*/) const override
+    {
+      shape_impl::draw(m_shape);
+    }
+    ShapePtr clone() const override
+    {
+      return
+        ::std::make_unique<ShapeModel>(*this);
+    }
+    bool operator<(
+      const ShapeConcept& other) const override
+    {
+      return
+         m_shape < other;
+    }
+    template <typename U>
+    bool lessThan(
+      const ShapeModel<U>& other) const
+    {
+      return
+        other.lessThanFtor(lessThanFtor);
+    }
+ private:
+    T  m_shape;
+  };
+  ShapePtr  pImpl;
+public:
+  void draw(/* ...*/) const
+  {
+    pImpl->draw();
+  }
+  bool operator<(
+    const Shape&  other) const
+  {
+    return pImpl->lessThan(*other.pImpl.get());
+  }
+  template <typename T>
+  Shape(const T& shape)
+  : pImpl(new ShapeModel(shape))
+  {}
+  template <typename T>
+  Shape(T&& shape)
+  : pImpl(new ShapeModel(std::move(shape)))
+  {}
+  Shape(const Shape&  shape)
+  : pImpl(shape.pImpl->clone())
+  {}
+  Shape(Shape&&  shape) = default;
+  Shape& operator=(const Shape&  shape)
+  { Shape tmp(shape); pImpl = std::move(tmp.pImpl); return *this; }
+  Shape& operator=(Shape&&  shape) = default;
+};
+#endif
+
+struct Down {};
+struct ConfSnd {};
+struct ConfRcv {};
+struct Active {};
+struct Up {};
+struct GoingDown {};
+
+struct EvBringUp {};
+struct EvCCDn {};
+struct EvConfDone {};
+struct EvConfErr {};
+
+template <typename... Ts> struct type_sequence;
+
+template <typename... Ts> struct head;
+
+template <typename T, typename... Ts>
+struct head<type_sequence<T, Ts...>> {
+  using type = T;
+};
+
+template <typename T>
+using head_t = typename head<T>::type;
+
+template <typename... Ts> struct tail;
+
+template <typename T, typename... Ts>
+struct tail<type_sequence<T, Ts...>> {
+  using type = type_sequence<Ts...>;
+};
+
+template <typename T>
+using tail_t = typename tail<T>::type;
+
+template <typename T, typename List> struct construct;
+
+template <typename T, typename... Ts>
+struct construct<T, type_sequence<Ts...>> {
+  using type = type_sequence<T, Ts...>;
+};
+
+template <typename T, typename List>
+using construct_t = typename construct<T, List>::type;
+
+template <typename List1, typename List2> struct concat;
+
+template <typename... Ts, typename... Us>
+struct concat<type_sequence<Ts...>, type_sequence<Us...>> {
+  using type = type_sequence<Ts..., Us...>;
+};
+
+template <typename List1, typename List2>
+using concat_t = typename concat<List1, List2>::type;
+
+template <typename T, typename List>
+struct contains : public std::false_type
+{};
+
+template <typename T>
+struct contains<T, type_sequence<>> : public std::false_type
+{};
+
+template <typename T, typename... Ts>
+struct contains<T, type_sequence<T, Ts...>> : public std::true_type
+{};
+
+template <typename T, typename U, typename... Ts>
+struct contains<T, type_sequence<U, Ts...>> : public std::integral_constant<bool, contains<T, type_sequence<Ts...>>::value>
+{};
+
+template <typename T, typename List>
+inline constexpr bool contains_v = contains<T, List>::value;
+
+template <typename T, typename U>
+struct unique_impl;
+
+template <typename... Ts>
+struct unique_impl<type_sequence<Ts...>, type_sequence<>> {
+  using type = type_sequence<Ts...>;
+};
+
+template <typename... Ts, typename T, typename... Us>
+struct unique_impl<type_sequence<Ts...>, type_sequence<T, Us...>> {
+  using type =
+    std::conditional_t<contains_v<T, type_sequence<Ts...>>,
+    typename unique_impl<type_sequence<Ts...>, type_sequence<Us...>>::type,
+    typename unique_impl<type_sequence<Ts..., T>, type_sequence<Us...>>::type>;
+};
+
+
+template <typename T>
+struct unique;
+
+template <typename T, typename... Ts>
+struct unique<type_sequence<T, Ts...>> {
+  using type = typename unique_impl<type_sequence<T>, type_sequence<Ts...>>::type;
+};
+
+template <class... Ts>
+struct unique<type_sequence<Ts...>> {
+  using type = type_sequence<Ts...>;
+};
+
+template <typename T>
+using unique_t = typename unique<T>::type;
+
+struct init {};
+template <class T>
+struct pool_type_impl {
+  explicit pool_type_impl(T object) : value{object} {}
+  template <class TObject>
+  pool_type_impl(init i, TObject object) : value{i, object} {}
+  T value;
+};
+template <typename  T>
+requires std::constructible_from<T>
+struct pool_type_impl<T &>
+{
+  explicit pool_type_impl(T &value) : value{value} {}
+  template <class TObject>
+  explicit pool_type_impl(TObject value) : value_{value}, value{value_} {}
+  template <class TObject>
+  pool_type_impl(const init &i, const TObject &object) : value(i, object) {}
+  T value_{};
+  T &value;
+};
+
+template <class T>
+struct pool_type : pool_type_impl<T> {
+  using pool_type_impl<T>::pool_type_impl;
+};
+
+template <class... Ts>
+struct pool : pool_type<Ts>... {
+};
+
+#if 0
+template <typename T>
+concept state = true;
+template <typename T>
+concept event = true;
+template <typename T>
+concept guard = true;
+template <typename T>
+concept action = true;
+#endif
+
+template <typename T>
+concept transitional =
+requires {
+  typename T::dst_state;
+  typename T::src_state;
+  typename T::event;
+  typename T::deps;
+  T::initial;
+  T::history;
+};
+
+template <transitional... Ts>
+auto make_transition_table(Ts... ts) {
+  return pool<Ts...>{ts...};
+}
 
 BOOST_AUTO_TEST_SUITE( util )
+
+BOOST_AUTO_TEST_CASE( unique_test )
+{
+
+  using Shapes = std::vector<Shape>;
+  Shapes shapes;
+  shapes.emplace_back(Circle{2.0, { 1.0, 1.5 }});
+  shapes.emplace_back(Square{2.5, { -1.5, 0.5 }});
+  const Circle  otherCircle{2.0, { 1.0, 1.5 }};
+  shapes.push_back(otherCircle);
+  for (const auto& shape : shapes)
+  {
+    shape.draw();
+  }
+
+//  struct A<12,void, std::tuple<int>> a1;
+//  a1.print();
+//  struct A<12,void, int> a2;
+//  a2.print();
+//  struct B<12,void, std::tuple<int>> b;
+//  b.print();
+
+  static_assert(std::is_same_v<head_t<type_sequence<EvBringUp, EvCCDn>>, EvBringUp>,
+    "something wrong");
+  static_assert(std::is_same_v<tail_t<type_sequence<EvBringUp, EvCCDn>>, type_sequence<EvCCDn>>,
+    "something wrong");
+  static_assert(std::is_same_v<construct_t<EvBringUp, type_sequence<EvCCDn>>, type_sequence<EvBringUp, EvCCDn>>,
+    "something wrong");
+  static_assert(std::is_same_v<concat_t<type_sequence<EvBringUp>, type_sequence<EvCCDn>>, type_sequence<EvBringUp, EvCCDn>>,
+    "something wrong");
+  static_assert(contains_v<EvBringUp, type_sequence<EvBringUp, EvCCDn>>,
+    "something wrong");
+  static_assert(contains_v<EvCCDn, type_sequence<EvBringUp, EvCCDn>>,
+    "something wrong");
+  static_assert(!contains_v<EvConfDone, type_sequence<EvBringUp, EvCCDn>>,
+    "something wrong");
+  static_assert(std::is_same_v<unique_impl<type_sequence<EvBringUp>, type_sequence<EvCCDn>>::type, type_sequence<EvBringUp, EvCCDn>>,
+    "something wrong");
+  static_assert(std::is_same_v<unique_t<type_sequence<EvBringUp, EvCCDn>>, type_sequence<EvBringUp, EvCCDn>>,
+    "something wrong");
+  static_assert(std::is_same_v<unique_t<type_sequence<EvBringUp, EvCCDn, EvBringUp>>, type_sequence<EvBringUp, EvCCDn>>,
+    "something wrong");
+  static_assert(std::is_same_v<unique_t<type_sequence<EvBringUp, EvCCDn, EvBringUp>>, type_sequence<EvBringUp, EvCCDn>>,
+    "something wrong");
+  static_assert(!std::is_same_v<unique_t<type_sequence<EvBringUp, EvCCDn, EvBringUp>>, type_sequence<EvCCDn>>,
+    "something wrong");
+
+  static_assert(std::is_same_v<fsm::unique_t<EvBringUp, EvCCDn>, fsm::type_list<EvBringUp, EvCCDn>>,
+    "something wrong");
+  static_assert(std::is_same_v<fsm::unique_t<EvBringUp, EvCCDn, EvBringUp>, fsm::type_list<EvBringUp, EvCCDn>>,
+    "something wrong");
+  static_assert(std::is_same_v<fsm::unique_t<EvBringUp, EvCCDn, EvBringUp>, fsm::unique_t<EvBringUp, EvCCDn>>,
+    "something wrong");
+  static_assert(!std::is_same_v<fsm::unique_t<EvBringUp, EvCCDn, EvBringUp>, fsm::unique_t<EvCCDn>>,
+    "something wrong");
+
+}
+
+BOOST_AUTO_TEST_CASE( concept_my_find )
+{
+  std::initializer_list<unsigned int> input = { 1, 4, 7, 8 };
+  auto even = [](unsigned int value) -> bool { return ( value % 2 == 0 ); };
+  auto iter = my_find_if(input.begin(), input.end(), even);
+  BOOST_CHECK(iter != input.end());
+  BOOST_CHECK_EQUAL(*iter, 4);
+}
 
 BOOST_AUTO_TEST_CASE( print_not_recursive_variant )
 {

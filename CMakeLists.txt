@@ -30,8 +30,8 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
 #set (CMAKE_EXE_LINKER_FLAGS "-lc++ -lc++abi -v" )
 #set(BOOST_LIBRARYDIR "${BOOST_ROOT}/clang/lib")
 else(USE_CLANG)
-SET (CMAKE_CXX_COMPILER             "/usr/bin/g++-11")
-SET (CMAKE_C_COMPILER               "/usr/bin/gcc-11")
+SET (CMAKE_CXX_COMPILER             "/usr/bin/g++-12")
+SET (CMAKE_C_COMPILER               "/usr/bin/gcc-12")
 #set(BOOST_LIBRARYDIR "${BOOST_ROOT}/g++/lib")
 endif(USE_CLANG)
 
@@ -69,6 +69,7 @@ include_directories ("${PROJECT_SOURCE_DIR}")
 add_subdirectory (base)
 add_subdirectory (uri)
 add_subdirectory (xml)
+add_subdirectory (test)
 
 enable_testing()
 
