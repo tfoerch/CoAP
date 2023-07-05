@@ -115,13 +115,78 @@ void Circle::doDraw(Canvas&  canvas) const
 void Square::doDraw(Canvas&  canvas) const
 { canvas.draw(*this); }
 
+
+template <typename... Ts> struct type_sequence;
+
+template <typename... Ts> struct head;
+
+template <typename T, typename... Ts>
+struct head<type_sequence<T, Ts...>> {
+  using type = T;
+};
+
+template <typename T>
+using head_t = typename head<T>::type;
+
+template <typename... Ts> struct tail;
+
+template <typename T, typename... Ts>
+struct tail<type_sequence<T, Ts...>> {
+  using type = type_sequence<Ts...>;
+};
+
+template <typename T>
+using tail_t = typename tail<T>::type;
+
+//template <class T, T... Ints>
+//class integer_sequence;
+
+template <class T, T... Ints> struct integer_head;
+
+template <class T, T Int, T... Ints>
+struct integer_head<std::integer_sequence<T, Int, Ints...>> {
+  static constexpr T value = Int;
+};
+
+template <typename T>
+inline constexpr typename T::value_type integer_head_v = integer_head<T>::value;
+
+template <class T, T... Ints> struct integer_tail;
+
+template <class T, T Int, T... Ints>
+struct integer_tail<std::integer_sequence<T, Int, Ints...>> {
+  using type = std::integer_sequence<T, Ints...>;
+};
+
+template <typename T>
+using integer_tail_t = typename integer_tail<T>::type;
+
+
 template<class CharT, class Traits, typename Array, std::size_t... Is>
 constexpr void printArray(
   std::basic_ostream<CharT,Traits>&  os,
   const Array&                       a,
-  std::index_sequence<Is...>)
+  const std::index_sequence<Is...>&)
 {
   ((os << (Is == 0? "" : ", ") << a[Is]), ...);
+}
+
+template<class CharT, class Traits, typename T>
+auto& operator<<(
+    std::basic_ostream<CharT,Traits>&  os,
+    const std::array<T, 0>&            a)
+{
+  os << "<>";
+  return os;
+}
+
+template<class CharT, class Traits, typename T>
+auto& operator<<(
+    std::basic_ostream<CharT,Traits>&  os,
+    const std::array<T, 1>&            a)
+{
+  os << '<' << a[0] << '>';
+  return os;
 }
 
 template<class CharT, class Traits, typename T, std::size_t N, typename Indices = std::make_index_sequence<N>>
@@ -200,8 +265,27 @@ void fillShapeVector(ShapeVector&  shapeVector, std::integer_sequence<T, ints...
 {
   (shapeVector.emplace_back(indexToData<ints>()), ...);
 }
+#if 0
+template <class T, T... Ints>
+class integer_sequence;
 
+template <class T, T... Ints> struct integer_tail;
+
+template <class T, T Int, T... Ints>
+struct integer_tail<integer_sequence<T, Int, Ints...>> {
+  using type = integer_sequence<T, Ints...>;
+};
+
+template <typename T>
+using integer_tail_t = typename integer_tail<T>::type;
+#endif
 int main(){
+  static_assert(integer_head<std::integer_sequence<int, 2, 5>>::value == 2,
+    "something wrong");
+  static_assert(integer_head_v<std::integer_sequence<int, 2, 5>> == 2,
+    "something wrong");
+  static_assert(std::is_same_v<integer_tail_t<std::integer_sequence<int, 5>>, std::integer_sequence<int>>,
+    "something wrong");
   const std::size_t numShapes = 100;
   Canvas  canvas(std::cout);
   ShapeVector  shapeVector(numShapes);
