@@ -23,12 +23,8 @@ auto LabelOCHImpl::getFrequencyInterval() const -> FrequencyIntervalResult
 {
   return m_frequencyInterval;
 }
-bool LabelOCHImpl::encode(ProtocolBuffer&  buffer)
-{
-  return true;
-}
 
-bool LabelOCHImpl::encode(Persistency&     persistency)
+bool LabelOCHImpl::encode(MsgBuffer&  /*buffer*/)
 {
   return true;
 }

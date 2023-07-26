@@ -11,10 +11,10 @@ namespace label::impl
 
   label::TributarySlotsResult getTributarySlots(const LabelOTN& label)
   { return label.getTributarySlots(); }
-  label::TributarySlotsResult getTributarySlots(const LabelOCH& label)
+  label::TributarySlotsResult getTributarySlots(const LabelOCH& /*label*/)
   { return label::TributarySlotsResult{label::ErrorCode::not_layer_1}; }
 
-  label::FrequencyIntervalResult getFrequencyInterval(const LabelOTN& label)
+  label::FrequencyIntervalResult getFrequencyInterval(const LabelOTN& /*label*/)
   { return label::FrequencyIntervalResult{label::ErrorCode::not_layer_0}; }
   label::FrequencyIntervalResult getFrequencyInterval(const LabelOCH& label)
   { return label.getFrequencyInterval(); }

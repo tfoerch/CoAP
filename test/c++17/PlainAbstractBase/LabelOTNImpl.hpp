@@ -11,8 +11,7 @@ public:
   ServiceType getServiceType() const override;
   TributarySlotsResult getTributarySlots() const override;
   FrequencyIntervalResult getFrequencyInterval() const override;
-  bool encode(ProtocolBuffer&  buffer) override;
-  bool encode(Persistency&     persistency) override;
+  bool encode(MsgBuffer&  buffer) override;
 private:
   ServiceType     m_serviceType;
   TributarySlots  m_tributarySlots;

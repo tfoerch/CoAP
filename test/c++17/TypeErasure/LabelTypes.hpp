@@ -6,7 +6,11 @@
 #include <utility> // std::pair
 #include <set> // std::set
 #include <variant> // std::variant
-#include <concepts>
+#ifdef __has_include
+#  if __has_include(<concepts>)
+#    include <concepts>
+#  endif
+#endif
 
 enum class ServiceType { och, odu0, odu2e, undef };
 
@@ -28,9 +32,20 @@ namespace label
 
 class Label;
 
-template <typename T>
-concept NotOfTypeLabel =
-   ( !std::same_as<std::decay_t<T>, Label> &&
-     !std::derived_from<std::decay_t<T>, Label> );
+#if __cpp_concepts
+  template <typename T>
+  concept NotOfTypeLabel =
+    ( !std::same_as<std::decay_t<T>, Label> &&
+      !std::derived_from<std::decay_t<T>, Label> );
+#else
+  template <typename T>
+  constexpr inline bool notOfTypeLabel()
+  {
+    using DecayedT = typename std::decay<T>::type;
+    return
+      ( !std::is_same_v<DecayedT, Label> &&
+        !std::is_base_of_v<Label, DecayedT> );
+  }
+#endif // __cpp_concepts
 
 #endif /* LABEL_TYPES_HPP */

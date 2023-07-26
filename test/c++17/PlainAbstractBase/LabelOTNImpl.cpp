@@ -26,12 +26,7 @@ auto LabelOTNImpl::getFrequencyInterval() const -> FrequencyIntervalResult
     FrequencyIntervalResult{label::ErrorCode::not_layer_0};
 }
 
-bool LabelOTNImpl::encode(ProtocolBuffer&  buffer)
-{
-  return true;
-}
-
-bool LabelOTNImpl::encode(Persistency&     persistency)
+bool LabelOTNImpl::encode(MsgBuffer&  /*buffer*/)
 {
   return true;
 }

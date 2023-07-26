@@ -261,7 +261,7 @@ ShapePtr indexToData()
 }
 
 template<typename T, T... ints>
-void fillShapeVector(ShapeVector&  shapeVector, std::integer_sequence<T, ints...> int_seq)
+void fillShapeVector(ShapeVector&  shapeVector, std::integer_sequence<T, ints...> /*int_seq*/)
 {
   (shapeVector.emplace_back(indexToData<ints>()), ...);
 }
@@ -319,16 +319,16 @@ int main(){
   CALLGRIND_STOP_INSTRUMENTATION;
   auto finish = std::chrono::high_resolution_clock::now();
   std::cout << "execution time: " << std::chrono::duration_cast<std::chrono::microseconds>(finish - start).count() << " us\n";
-  auto minmax = [](std::pair<Coordinate2D, Coordinate2D> curCorner, const ShapePtr& shapePtr)
-    {
-      auto result = std::move(curCorner);
-      if (shapePtr){
-        const auto& corners = shapePtr->getSurroundingRectangleCorners();
-        result.first[0] = std::min(result.first[0], corners.first[0]);
-        result.first[1] = std::min(result.first[1], corners.first[1]);
-        result.second[0] = std::max(result.second[0], corners.second[0]);
-        result.second[1] = std::max(result.second[1], corners.second[1]);
-      }
-      return result;
-    };
+//  auto minmax = [](std::pair<Coordinate2D, Coordinate2D> curCorner, const ShapePtr& shapePtr)
+//    {
+//      auto result = std::move(curCorner);
+//      if (shapePtr){
+//        const auto& corners = shapePtr->getSurroundingRectangleCorners();
+//        result.first[0] = std::min(result.first[0], corners.first[0]);
+//        result.first[1] = std::min(result.first[1], corners.first[1]);
+//        result.second[0] = std::max(result.second[0], corners.second[0]);
+//        result.second[1] = std::max(result.second[1], corners.second[1]);
+//      }
+//      return result;
+//    };
 }

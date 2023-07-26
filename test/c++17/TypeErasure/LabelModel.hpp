@@ -6,7 +6,11 @@
 
 namespace label::impl
 {
+#if __cpp_concepts
   template <NotOfTypeLabel T>
+#else
+  template <typename T>
+#endif // __cpp_concepts
   class LabelModel final : public LabelConcept
   {
   public:

@@ -7,8 +7,7 @@
 #include <set> // std::set
 #include <variant> // std::variant
 
-class ProtocolBuffer;
-class Persistency;
+class MsgBuffer;
 
 enum class ServiceType { och, odu0, odu2e, undef };
 
@@ -47,10 +46,8 @@ public:
   ServiceType getServiceType() const;
   TributarySlotsResult getTributarySlots() const; // layer 1
   FrequencyIntervalResult getFrequencyInterval() const;// layer 0
-  bool encode(ProtocolBuffer&  buffer);
-  bool encode(Persistency&     persistency);
-  static Label decode(const ProtocolBuffer&  buffer);
-  static Label decode(const Persistency&     persistency);
+  bool encode(MsgBuffer&  buffer);
+  static Label decode(const MsgBuffer&  buffer);
 private:
   std::unique_ptr<label::impl::LabelImplBase>  m_labelImplPtr;
 };

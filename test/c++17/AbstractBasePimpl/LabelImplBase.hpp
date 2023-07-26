@@ -16,8 +16,7 @@ namespace label::impl
     virtual ServiceType getServiceType() const = 0;
     virtual TributarySlotsResult getTributarySlots() const = 0; // layer 1
     virtual FrequencyIntervalResult getFrequencyInterval() const = 0;// layer 0
-    virtual bool encode(ProtocolBuffer&  buffer) = 0;
-    virtual bool encode(Persistency&     persistency) = 0;
+    virtual bool encode(MsgBuffer&  buffer) = 0;
   };
 }; // namespace label::impl
 

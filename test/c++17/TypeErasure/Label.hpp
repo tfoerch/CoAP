@@ -19,7 +19,11 @@ public:
                LabelPtr())
   {}
   Label(Label&&  label) = default;
+#if __cpp_concepts
   template <NotOfTypeLabel T>
+#else
+  template <typename T, std::enable_if_t<notOfTypeLabel<T>(), bool> = true>
+#endif // __cpp_concepts
   explicit Label(T&& label)
   : m_labelPtr(std::make_unique<label::impl::LabelModel<T>>(std::forward<T>(label)))
   {}

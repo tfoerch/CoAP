@@ -21,7 +21,7 @@ auto LabelOCH::getFrequencyInterval() const -> FrequencyIntervalResult
   return m_frequencyInterval;
 }
 
-void LabelOCH::encode(MsgBuffer&  buffer) const
+void LabelOCH::encode(MsgBuffer&  /*buffer*/) const
 {
 }
 

@@ -23,7 +23,7 @@ auto LabelOTN::getTributarySlots() const -> TributarySlotsResult
   return m_tributarySlots;
 }
 
-void LabelOTN::encode(MsgBuffer&  buffer) const
+void LabelOTN::encode(MsgBuffer&  /*buffer*/) const
 {
 }
 

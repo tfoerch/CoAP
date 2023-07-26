@@ -13,8 +13,7 @@ namespace label::impl
     ServiceType getServiceType() const override;
     TributarySlotsResult getTributarySlots() const override;
     FrequencyIntervalResult getFrequencyInterval() const override;
-    bool encode(ProtocolBuffer&  buffer) override;
-    bool encode(Persistency&     persistency) override;
+    bool encode(MsgBuffer&  buffer) override;
   private:
     FrequencyInterval  m_frequencyInterval;
   };
