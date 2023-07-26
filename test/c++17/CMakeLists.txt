@@ -16,5 +16,7 @@ set(CMAKE_VERBOSE_BUILD ON)
 
 add_subdirectory(polymorphism)
 add_subdirectory(AbstractBasePimpl)
+add_subdirectory(PlainAbstractBase)
+add_subdirectory(TypeErasure)
 
 include_directories ("${PROJECT_SOURCE_DIR}")

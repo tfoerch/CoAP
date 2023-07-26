@@ -54,4 +54,7 @@ public:
 private:
   std::unique_ptr<label::impl::LabelImplBase>  m_labelImplPtr;
 };
+
+#include "LabelImplBase.hpp"
+
 #endif /* LABEL_HPP */
