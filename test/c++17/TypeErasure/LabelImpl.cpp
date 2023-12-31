@@ -4,24 +4,32 @@
 
 namespace label::impl
 {
-  ServiceType  getServiceType(const LabelOTN& label)
+  auto getServiceType(const LabelOTN& label) -> ServiceType
   { return label.getServiceType(); }
-  ServiceType  getServiceType(const LabelOCH& label)
+  auto getServiceType(const LabelOCH& label) -> ServiceType
   { return label.getServiceType(); }
 
-  label::TributarySlotsResult getTributarySlots(const LabelOTN& label)
-  { return label.getTributarySlots(); }
-  label::TributarySlotsResult getTributarySlots(const LabelOCH& /*label*/)
-  { return label::TributarySlotsResult{label::ErrorCode::not_layer_1}; }
+  auto getTributarySlots(const LabelOTN& label) -> label::TributarySlotsConstResult
+  { return {std::cref(label.getTributarySlots())}; }
+  auto getTributarySlots(const LabelOCH& /*label*/) -> label::TributarySlotsConstResult
+  { return {label::ErrorCode::not_layer_1}; }
+  auto accessTributarySlots(LabelOTN& label) -> label::TributarySlotsNonConstResult
+  { return {std::ref(label.accessTributarySlots())}; }
+  auto accessTributarySlots(LabelOCH& /*label*/) -> label::TributarySlotsNonConstResult
+  { return {label::ErrorCode::not_layer_1}; }
 
-  label::FrequencyIntervalResult getFrequencyInterval(const LabelOTN& /*label*/)
-  { return label::FrequencyIntervalResult{label::ErrorCode::not_layer_0}; }
-  label::FrequencyIntervalResult getFrequencyInterval(const LabelOCH& label)
-  { return label.getFrequencyInterval(); }
+  auto getFrequencySlot(const LabelOTN& /*label*/) -> label::FrequencySlotConstResult
+  { return {label::ErrorCode::not_layer_0}; }
+  auto getFrequencySlot(const LabelOCH& label) -> label::FrequencySlotConstResult
+  { return {std::cref(label.getFrequencySlot())}; }
+  auto accessFrequencySlot(LabelOTN& /*label*/) -> label::FrequencySlotNonConstResult
+  { return {label::ErrorCode::not_layer_0}; }
+  auto accessFrequencySlot(LabelOCH& label) -> label::FrequencySlotNonConstResult
+  { return {std::ref(label.accessFrequencySlot())}; }
 
-  void encode(const LabelOTN& label, MsgBuffer&  buffer)
-  { label.encode(buffer); }
-  void encode(const LabelOCH& label, MsgBuffer&  buffer)
-  { label.encode(buffer); }
+  auto encode(const LabelOTN& label, MsgBuffer&  buffer) -> bool
+  { return label.encode(buffer); }
+  auto encode(const LabelOCH& label, MsgBuffer&  buffer) -> bool
+  { return label.encode(buffer); }
 
 }; // namespace label::impl

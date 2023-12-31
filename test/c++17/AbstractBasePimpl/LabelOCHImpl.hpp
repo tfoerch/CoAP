@@ -8,14 +8,16 @@ namespace label::impl
   class LabelOCHImpl : public LabelImplBase
   {
   public:
-    explicit LabelOCHImpl(const FrequencyInterval& frequencyInterval);
-    explicit LabelOCHImpl(FrequencyInterval&& frequencyInterval);
-    ServiceType getServiceType() const override;
-    TributarySlotsResult getTributarySlots() const override;
-    FrequencyIntervalResult getFrequencyInterval() const override;
-    bool encode(MsgBuffer&  buffer) override;
+    explicit LabelOCHImpl(const FrequencySlot& frequencySlot);
+    explicit LabelOCHImpl(FrequencySlot&& frequencySlot);
+    auto getServiceType() const -> ServiceType override;
+    auto getTributarySlots() const -> TributarySlotsConstResult override;
+    auto accessTributarySlots() -> TributarySlotsNonConstResult override;
+    auto getFrequencySlot() const -> FrequencySlotConstResult override;
+    auto accessFrequencySlot() -> FrequencySlotNonConstResult override;
+    auto encode(MsgBuffer&  buffer) const -> bool override;
   private:
-    FrequencyInterval  m_frequencyInterval;
+    FrequencySlot  m_frequencySlot;
   };
 }; // namespace label::impl
 

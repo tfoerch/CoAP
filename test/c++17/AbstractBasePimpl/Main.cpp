@@ -1,18 +1,97 @@
 #include "Label.hpp"
 
 #include <vector>
+#include <cassert>
 
-int main()
+namespace {
+
+template<class... Ts>
+struct Overloaded : Ts... { using Ts::operator()...; };
+// explicit deduction guide (not needed as of C++20)
+template<class... Ts>
+Overloaded(Ts...) -> Overloaded<Ts...>;
+
+auto isEqual(
+  const std::initializer_list<uint32_t>& tribSlots,
+  const label::TributarySlotsConstResult& tribSlotResult) -> bool
 {
-  Label  odu0Label(ServiceType::odu0, label::TributarySlots({ 1 }));
-  Label  odu2eLabel(ServiceType::odu2e, label::TributarySlots({ 4, 5, 6, 7, 12, 13, 14, 15 }));
-  Label  ochLabel(label::FrequencyInterval{-32, -24});
-  // Label copy1OfOdu0Label = odu0Label; error deleted copy ctor
-  // Label copy1OfOdu0Label; copy1OfOdu0Label = odu0Label; error deleted assign
-  std::vector<Label>  labels;
-  labels.emplace_back(ServiceType::odu0, label::TributarySlots({ 23 })); // construct the Label in-place
-  labels.emplace_back(label::FrequencyInterval{-4, +4}); // construct the Label in-place
-  labels.push_back(Label(ServiceType::odu0, label::TributarySlots({ 23 }))); // constructed then moved
-  labels.push_back(Label(label::FrequencyInterval{-4, +4})); // constructed then moved
-  // std::vector<Label>  copyofLabels; copyofLabels = labels; error deleted assign
+  return
+    std::visit(Overloaded{
+      [&tribSlots](const label::TributarySlotsConstRef& tribSlotsRef)
+      { return
+          std::equal(tribSlots.begin(), tribSlots.end(),
+                     tribSlotsRef.get().begin(), tribSlotsRef.get().end()); },
+      [](const label::ErrorCode&  /* errorCode */)
+      { return false; }
+    }, tribSlotResult);
+}
+
+auto isEqual(
+  const label::FrequencySlot& freqSlot,
+  const label::FrequencySlotConstResult& freqSlotResult) -> bool
+{
+  return
+    std::visit(Overloaded{
+      [&freqSlot](const label::FrequencySlotConstRef& freqSlotRef)
+      { return
+          ( freqSlot == freqSlotRef.get() ); },
+      [](const label::ErrorCode&  /* errorCode */)
+      { return false; }
+    }, freqSlotResult);
+}
+
+} // namespace anonymous
+
+auto main() -> int // NOLINT(bugprone-exception-escape)
+{
+  // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
+  const std::initializer_list<uint32_t> tribSlotsOf1stOdukLabel = { 1 };
+  const std::initializer_list<uint32_t> tribSlotsOf2ndOdukLabel = { 4, 5, 6, 7, 12, 13, 14, 15 }; // ordered for easier tests
+  const std::initializer_list<uint32_t> tribSlotsOf3rdOdukLabel = { 8 };
+  const label::FrequencySlot freqSlotOf1stOchLabel{-32, 4};
+  const label::FrequencySlot freqSlotOf2ndOchLabel{-4, 4};
+  // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
+  std::vector<Label>  layer0Labels;
+  std::vector<Label>  layer1Labels;
+  {
+    Label odu0Label(ServiceType::odu0, label::TributarySlots(tribSlotsOf1stOdukLabel.begin(), tribSlotsOf1stOdukLabel.end()));
+    Label ochLabel(freqSlotOf1stOchLabel);
+    Label odu2eLabel(ServiceType::odu2e, label::TributarySlots(tribSlotsOf2ndOdukLabel.begin(), tribSlotsOf2ndOdukLabel.end()));
+    std::vector<Label>  labels;
+    labels.push_back(std::move(odu0Label));
+    labels.push_back(std::move(ochLabel));
+    labels.push_back(std::move(odu2eLabel));
+    labels.emplace_back(ServiceType::odu0, label::TributarySlots(tribSlotsOf3rdOdukLabel.begin(), tribSlotsOf3rdOdukLabel.end()));
+    labels.emplace_back(freqSlotOf2ndOchLabel);
+    std::copy_if(std::make_move_iterator(labels.begin()), std::make_move_iterator(labels.end()),
+                 std::back_inserter(layer0Labels),
+                 [](const auto& entry){ return entry.getServiceType() == ServiceType::och;});
+    std::copy_if(std::make_move_iterator(labels.begin()), std::make_move_iterator(labels.end()),
+                 std::back_inserter(layer1Labels),
+                 [](const auto& entry)
+                 { return ( entry.getServiceType() == ServiceType::odu0 ||
+                            entry.getServiceType() == ServiceType::odu2e );});
+  }
+  using TribSlotInitListConstRef = std::reference_wrapper<const std::initializer_list<uint32_t>>;
+  using Layer1LabelParams = std::pair<ServiceType, TribSlotInitListConstRef>;
+  const std::initializer_list<Layer1LabelParams> expLayer1LabelParams =
+    { { ServiceType::odu0, std::cref(tribSlotsOf1stOdukLabel) },
+      { ServiceType::odu2e, std::cref(tribSlotsOf2ndOdukLabel) },
+      { ServiceType::odu0, std::cref(tribSlotsOf3rdOdukLabel) } };
+  const std::initializer_list<label::FrequencySlot> expLayer0LabelParams =
+    { freqSlotOf1stOchLabel, freqSlotOf2ndOchLabel };
+  assert(std::equal(expLayer1LabelParams.begin(), expLayer1LabelParams.end(),
+                    layer1Labels.begin(), layer1Labels.end(),
+                    [](const auto& expParam, const auto& layer1Label)
+                    { return
+                        ( expParam.first == layer1Label.getServiceType() &&
+                          ::isEqual(expParam.second.get(), layer1Label.getTributarySlots()) );
+                    }));
+  assert(std::equal(expLayer0LabelParams.begin(), expLayer0LabelParams.end(),
+                    layer0Labels.begin(), layer0Labels.end(),
+                    [](const auto& expParam, const auto& layer0Label)
+                    { return
+                        ( ServiceType::och == layer0Label.getServiceType() &&
+                          ::isEqual(expParam, layer0Label.getFrequencySlot()) );
+                    }));
 }

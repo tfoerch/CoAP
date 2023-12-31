@@ -2,18 +2,11 @@
 #define LABEL_HPP
 
 #include "LabelTypes.hpp"
-
-#include <memory> // std::unique_ptr
+#include "LabelOTN.hpp"
+#include "LabelOCH.hpp"
 
 class MsgBuffer;
 
-namespace label
-{
-  namespace impl
-  {
-    class LabelImplBase;
-  }
-}
 
 class Label
 {
@@ -28,12 +21,6 @@ public:
   Label(ServiceType serviceType, TributarySlots&& tributarySlots);
   explicit Label(const FrequencySlot& frequencySlot);
   explicit Label(FrequencySlot&& frequencySlot);
-  Label() = default;
-  Label(const Label&) = delete; // implicitly deleted due to deleted copy ctor of std::unique_ptr
-  Label(Label&&) = default;
-  Label& operator=(const Label&) = delete; // implicitly deleted
-  Label& operator=(Label&&) = default;
-  ~Label();
   auto getServiceType() const -> ServiceType;
   auto getTributarySlots() const -> TributarySlotsConstResult; // layer 1
   auto accessTributarySlots() -> TributarySlotsNonConstResult; // layer 1
@@ -42,13 +29,10 @@ public:
   auto encode(MsgBuffer&  buffer) const -> bool;
   static Label decode(const MsgBuffer&  buffer);
 private:
-  struct DeleteFtor
-  {
-    void operator()(label::impl::LabelImplBase* ptr);
-  };
-  using LabelPtr = std::unique_ptr<label::impl::LabelImplBase, DeleteFtor>;
-  LabelPtr           m_labelImplPtr;
-  static const DeleteFtor  c_deleter;
+  using LabelType =
+    std::variant<label::LabelOTN,
+                 label::LabelOCH>;
+  LabelType  m_label;
 };
 
 #endif /* LABEL_HPP */

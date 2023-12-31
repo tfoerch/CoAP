@@ -5,7 +5,7 @@
 #include <vector>
 #include <cassert>
 
-int main()
+auto main() -> int
 {
   static_assert(std::is_same_v<std::decay_t<Label&>, Label>);
 #if __cpp_concepts
@@ -13,15 +13,17 @@ int main()
 #else
   static_assert(notOfTypeLabel<label::LabelOTN>());
 #endif // __cpp_concepts
-  Label  odu0Label(label::LabelOTN(ServiceType::odu0, label::TributarySlots({ 1 })));
+  const Label  odu0Label(label::LabelOTN(ServiceType::odu0, label::TributarySlots({ 1 })));
   assert(odu0Label.getServiceType() == ServiceType::odu0);
-  Label  odu2eLabel(label::LabelOTN(ServiceType::odu2e, label::TributarySlots({ 4, 5, 6, 7, 12, 13, 14, 15 })));
-  Label  ochLabel(label::LabelOCH(label::FrequencyInterval{-32, -24}));
-  Label copy1OfOdu0Label = odu0Label;
+  const Label  odu2eLabel(label::LabelOTN(ServiceType::odu2e, label::TributarySlots({ 4, 5, 6, 7, 12, 13, 14, 15 }))); // NOLINT(cppcoreguidelines-avoid-magic-numbers)
+  const Label  ochLabel(label::LabelOCH(label::FrequencySlot{-32, 4}));
+  const Label copy1OfOdu0Label = odu0Label; // NOLINT(performance-unnecessary-copy-initialization)
   std::vector<Label>  labels;
+  // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
   labels.emplace_back(label::LabelOTN(ServiceType::odu0, label::TributarySlots({ 23 }))); // construct the Label in-place
-  labels.emplace_back(label::LabelOCH(label::FrequencyInterval{-4, +4})); // construct the Label in-place
-  labels.push_back(Label(label::LabelOTN(ServiceType::odu0, label::TributarySlots({ 23 })))); // constructed then moved
-  labels.push_back(Label(label::LabelOCH(label::FrequencyInterval{-4, +4}))); // constructed then moved
+  labels.emplace_back(label::LabelOCH(label::FrequencySlot{-4, 4})); // construct the Label in-place
+  labels.push_back(Label(label::LabelOTN(ServiceType::odu0, label::TributarySlots({ 23 })))); // NOLINT(modernize-use-emplace) constructed then moved
+  labels.push_back(Label(label::LabelOCH(label::FrequencySlot{-4, 4}))); // NOLINT(modernize-use-emplace) constructed then moved
+  // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
   std::vector<Label>  copyofLabels; copyofLabels = labels;
 }

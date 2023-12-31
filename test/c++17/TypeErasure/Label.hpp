@@ -2,17 +2,28 @@
 #define LABEL_HPP
 
 #include "LabelTypes.hpp"
-#include "LabelModel.hpp"
+#include "NotOfTypeLabelConcept.hpp"
+#include "LabelModel.hpp" // and its base class LabelConcept
 
 class MsgBuffer;
+
+namespace label
+{
+  namespace impl
+  {
+    class LabelConcept;
+  }
+}
 
 class Label
 {
 public:
   using TributarySlots = label::TributarySlots;
-  using FrequencyInterval = label::FrequencyInterval;
-  using TributarySlotsResult = label::TributarySlotsResult;
-  using FrequencyIntervalResult = label::FrequencyIntervalResult;
+  using FrequencySlot = label::FrequencySlot;
+  using TributarySlotsConstResult = label::TributarySlotsConstResult;
+  using TributarySlotsNonConstResult = label::TributarySlotsNonConstResult;
+  using FrequencySlotConstResult = label::FrequencySlotConstResult;
+  using FrequencySlotNonConstResult = label::FrequencySlotNonConstResult;
   Label(const Label&  label)
   : m_labelPtr(label.m_labelPtr ?
                label.m_labelPtr->clone() :
@@ -32,27 +43,38 @@ public:
     return *this; }
   Label& operator=(Label&&  label) = default;
   ~Label() = default;
-  ServiceType getServiceType() const
+  auto getServiceType() const -> ServiceType
   { return
       ( m_labelPtr ?
         m_labelPtr->getServiceType() :
         ServiceType::undef ); }
-  TributarySlotsResult getTributarySlots() const // layer 1
+  auto getTributarySlots() const -> TributarySlotsConstResult // layer 1
   { return
       ( m_labelPtr ?
         m_labelPtr->getTributarySlots() :
-        TributarySlotsResult{label::ErrorCode::not_layer_1} ); }
-  FrequencyIntervalResult getFrequencyInterval() const// layer 0
+        TributarySlotsConstResult{label::ErrorCode::not_layer_1} ); }
+  auto accessTributarySlots() -> TributarySlotsNonConstResult // layer 1
   { return
       ( m_labelPtr ?
-        m_labelPtr->getFrequencyInterval() :
-        FrequencyIntervalResult{label::ErrorCode::not_layer_0} ); }
-  void encode(MsgBuffer&  buffer) const
+        m_labelPtr->accessTributarySlots() :
+        TributarySlotsNonConstResult{label::ErrorCode::not_layer_1} ); }
+  auto getFrequencySlot() const -> FrequencySlotConstResult // layer 0
+  { return
+      ( m_labelPtr ?
+        m_labelPtr->getFrequencySlot() :
+        FrequencySlotConstResult{label::ErrorCode::not_layer_0} ); }
+  auto accessFrequencySlot() -> FrequencySlotNonConstResult
+  { return
+      ( m_labelPtr ?
+        m_labelPtr->accessFrequencySlot() :
+        FrequencySlotNonConstResult{label::ErrorCode::not_layer_0} ); }
+  auto encode(MsgBuffer&  buffer) const -> bool
   {
     if (m_labelPtr)
     {
-      m_labelPtr->encode(buffer);
+      return m_labelPtr->encode(buffer);
     }
+    return false;
   }
 //  static Label decode(const MsgBuffer&  buffer);
 private:

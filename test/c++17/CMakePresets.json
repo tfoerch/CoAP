@@ -7,12 +7,13 @@
   },
   "configurePresets": [
     {
-      "name": "default",
-      "displayName": "Default",
+      "name": "defaultgnu",
+      "displayName": "DefaultGnu",
       "description": "Default build using Unix Makefiles",
       "generator": "Unix Makefiles",
-      "binaryDir": "${sourceDir}/../../../../build/CoAP/clang/c++17",
+      "binaryDir": "${sourceDir}/../../../../build/CoAP/gcc/c++17",
       "cacheVariables": {
+        "USE_CLANG": "OFF",
         "CMAKE_CXX_FLAGS": "-Werror -Wall -Wextra -pedantic -Og",
         "CMAKE_CXX_STANDARD": "20",
         "CMAKE_CXX_STANDARD_REQUIRED": "YES",
@@ -20,12 +21,41 @@
       }
     },
     {
-      "name": "defaultCpp17",
-      "displayName": "Default",
+      "name": "defaultgnuCpp17",
+      "displayName": "DefaultGnuCpp17",
+      "description": "Default build using Unix Makefiles",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/../../../../build/CoAP/gcc/c++17",
+      "cacheVariables": {
+        "USE_CLANG": "OFF",
+        "CMAKE_CXX_FLAGS": "-Werror -Wall -Wextra -pedantic -Og",
+        "CMAKE_CXX_STANDARD": "17",
+        "CMAKE_CXX_STANDARD_REQUIRED": "YES",
+        "CMAKE_CXX_EXTENSIONS": "OFF"
+      }
+    },
+    {
+      "name": "defaultclang",
+      "displayName": "DefaultClang",
       "description": "Default build using Unix Makefiles",
       "generator": "Unix Makefiles",
       "binaryDir": "${sourceDir}/../../../../build/CoAP/clang/c++17",
       "cacheVariables": {
+        "USE_CLANG": "ON",
+        "CMAKE_CXX_FLAGS": "-Werror -Wall -Wextra -pedantic -Og",
+        "CMAKE_CXX_STANDARD": "20",
+        "CMAKE_CXX_STANDARD_REQUIRED": "YES",
+        "CMAKE_CXX_EXTENSIONS": "OFF"
+      }
+    },
+    {
+      "name": "defaultclangCpp17",
+      "displayName": "DefaultClangCpp17",
+      "description": "Default build using Unix Makefiles",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/../../../../build/CoAP/clang/c++17",
+      "cacheVariables": {
+        "USE_CLANG": "ON",
         "CMAKE_CXX_FLAGS": "-Werror -Wall -Wextra -pedantic -Og",
         "CMAKE_CXX_STANDARD": "17",
         "CMAKE_CXX_STANDARD_REQUIRED": "YES",
@@ -34,4 +64,3 @@
     }
   ]
 }
-

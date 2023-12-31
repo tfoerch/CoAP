@@ -1,7 +1,9 @@
 #ifndef LABEL_IMPL_BASE_HPP
 #define LABEL_IMPL_BASE_HPP
 
-#include "Label.hpp"
+#include "LabelTypes.hpp"
+
+class MsgBuffer;
 
 namespace label::impl
 {
@@ -9,16 +11,19 @@ namespace label::impl
   {
   public:
     using TributarySlots = label::TributarySlots;
-    using FrequencyInterval = label::FrequencyInterval;
-    using TributarySlotsResult = label::TributarySlotsResult;
-    using FrequencyIntervalResult = label::FrequencyIntervalResult;
+    using FrequencySlot = label::FrequencySlot;
+    using TributarySlotsConstResult = label::TributarySlotsConstResult;
+    using TributarySlotsNonConstResult = label::TributarySlotsNonConstResult;
+    using FrequencySlotConstResult = label::FrequencySlotConstResult;
+    using FrequencySlotNonConstResult = label::FrequencySlotNonConstResult;
     virtual ~LabelImplBase() = default;
-    virtual ServiceType getServiceType() const = 0;
-    virtual TributarySlotsResult getTributarySlots() const = 0; // layer 1
-    virtual FrequencyIntervalResult getFrequencyInterval() const = 0;// layer 0
-    virtual bool encode(MsgBuffer&  buffer) = 0;
+    virtual auto getServiceType() const -> ServiceType = 0;
+    virtual auto getTributarySlots() const -> TributarySlotsConstResult = 0; // layer 1
+    virtual auto accessTributarySlots() -> TributarySlotsNonConstResult = 0; // layer 1
+    virtual auto getFrequencySlot() const -> FrequencySlotConstResult = 0; // layer 0
+    virtual auto accessFrequencySlot() -> FrequencySlotNonConstResult = 0; // layer 0
+    virtual auto encode(MsgBuffer&  buffer) const -> bool = 0;
   };
-}; // namespace label::impl
-
+} // namespace label::impl
 
 #endif /* LABEL_IMPL_BASE_HPP */

@@ -17,29 +17,40 @@ namespace label::impl
     LabelModel(T&&  label)
     : m_label(std::forward<T>(label))
     {}
-    LabelPtr clone() const override
+    auto clone() const -> LabelPtr override
     {
       return
         std::make_unique<LabelModel>(*this);
     }
-    ServiceType getServiceType() const override
+    auto getServiceType() const -> ServiceType override
     {
       return
         label::impl::getServiceType(m_label);
     }
-    TributarySlotsResult getTributarySlots() const override // layer 1
+    auto getTributarySlots() const -> TributarySlotsConstResult override // layer 1
     {
       return
         label::impl::getTributarySlots(m_label);
     }
-    FrequencyIntervalResult getFrequencyInterval() const override // layer 0
+    auto accessTributarySlots() -> TributarySlotsNonConstResult override // layer 1
     {
       return
-        label::impl::getFrequencyInterval(m_label);
+        label::impl::accessTributarySlots(m_label);
     }
-    void encode(MsgBuffer&  buffer) const override
+    auto getFrequencySlot() const -> FrequencySlotConstResult override // layer 0
     {
-      label::impl::encode(m_label, buffer);
+      return
+        label::impl::getFrequencySlot(m_label);
+    }
+    auto accessFrequencySlot() -> FrequencySlotNonConstResult override // layer 0
+    {
+      return
+        label::impl::accessFrequencySlot(m_label);
+    }
+    auto encode(MsgBuffer&  buffer) const -> bool override
+    {
+      return
+        label::impl::encode(m_label, buffer);
     }
   private:
      T  m_label;

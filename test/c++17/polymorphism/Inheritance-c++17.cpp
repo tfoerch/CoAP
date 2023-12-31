@@ -174,7 +174,7 @@ constexpr void printArray(
 template<class CharT, class Traits, typename T>
 auto& operator<<(
     std::basic_ostream<CharT,Traits>&  os,
-    const std::array<T, 0>&            a)
+    const std::array<T, 0>&            /* a */)
 {
   os << "<>";
   return os;

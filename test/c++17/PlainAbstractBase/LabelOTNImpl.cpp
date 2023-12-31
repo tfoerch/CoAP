@@ -7,26 +7,37 @@ LabelOTNImpl::LabelOTNImpl(ServiceType serviceType, const TributarySlots& tribut
 
 LabelOTNImpl::LabelOTNImpl(ServiceType serviceType, TributarySlots&& tributarySlots)
 : m_serviceType(serviceType),
-  m_tributarySlots(tributarySlots)
+  m_tributarySlots(std::move(tributarySlots))
 {}
 
-ServiceType LabelOTNImpl::getServiceType() const
+auto LabelOTNImpl::getServiceType() const -> ServiceType
 {
   return m_serviceType;
 }
 
-auto LabelOTNImpl::getTributarySlots() const -> TributarySlotsResult
+auto LabelOTNImpl::getTributarySlots() const -> TributarySlotsConstResult
 {
-  return m_tributarySlots;
+  return std::cref(m_tributarySlots);
 }
 
-auto LabelOTNImpl::getFrequencyInterval() const -> FrequencyIntervalResult
+auto LabelOTNImpl::accessTributarySlots() -> TributarySlotsNonConstResult
+{
+  return std::ref(m_tributarySlots);
+}
+
+auto LabelOTNImpl::getFrequencySlot() const -> FrequencySlotConstResult
 {
   return
-    FrequencyIntervalResult{label::ErrorCode::not_layer_0};
+    {label::ErrorCode::not_layer_0};
 }
 
-bool LabelOTNImpl::encode(MsgBuffer&  /*buffer*/)
+auto LabelOTNImpl::accessFrequencySlot() -> FrequencySlotNonConstResult
+{
+  return
+    {label::ErrorCode::not_layer_0};
+}
+
+auto LabelOTNImpl::encode(MsgBuffer&  /*buffer*/) const -> bool
 {
   return true;
 }

@@ -3,6 +3,8 @@
 
 #include "LabelTypes.hpp"
 
+#include <memory> // std::unique_ptr
+
 class MsgBuffer;
 
 namespace label::impl
@@ -11,16 +13,24 @@ namespace label::impl
   {
   public:
     using TributarySlots = label::TributarySlots;
-    using FrequencyInterval = label::FrequencyInterval;
-    using TributarySlotsResult = label::TributarySlotsResult;
-    using FrequencyIntervalResult = label::FrequencyIntervalResult;
+    using FrequencySlot = label::FrequencySlot;
+    using TributarySlotsConstResult = label::TributarySlotsConstResult;
+    using TributarySlotsNonConstResult = label::TributarySlotsNonConstResult;
+    using FrequencySlotConstResult = label::FrequencySlotConstResult;
+    using FrequencySlotNonConstResult = label::FrequencySlotNonConstResult;
+    using LabelPtr = std::unique_ptr<LabelConcept>;
     virtual ~LabelConcept() = default;
-    virtual LabelPtr clone() const = 0;
-    virtual ServiceType getServiceType() const = 0;
-    virtual TributarySlotsResult getTributarySlots() const = 0; // layer 1
-    virtual FrequencyIntervalResult getFrequencyInterval() const = 0;// layer 0
-    virtual void encode(MsgBuffer&  buffer) const = 0;
+    virtual auto clone() const -> LabelPtr = 0;
+    virtual auto getServiceType() const -> ServiceType = 0;
+    virtual auto getTributarySlots() const -> TributarySlotsConstResult = 0; // layer 1
+    virtual auto accessTributarySlots() -> TributarySlotsNonConstResult = 0; // layer 1
+    virtual auto getFrequencySlot() const -> FrequencySlotConstResult = 0; // layer 0
+    virtual auto accessFrequencySlot() -> FrequencySlotNonConstResult = 0; // layer 0
+    virtual auto encode(MsgBuffer&  buffer) const -> bool = 0;
   };
+
+  using LabelPtr = LabelConcept::LabelPtr;
+
 }; // namespace label::impl
 
 #endif /* LABEL_CONCEPT_HPP */
