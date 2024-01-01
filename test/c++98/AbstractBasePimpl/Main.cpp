@@ -46,12 +46,14 @@ int main()
     labels.push_back(odu2eLabel);
     labels.push_back(Label(ServiceType_odu0, label::TributarySlots(tribSlotsOf3rdOdukLabel, tribSlotsOf3rdOdukLabel + sizeof(tribSlotsOf3rdOdukLabel)/sizeof(uint32_t))));
     labels.push_back(Label(freqSlotOf2ndOchLabel));
+    assert(labels.size() == 5);
     std::remove_copy_if(labels.begin(), labels.end(),
                         std::back_inserter(layer0Labels),
                         ::IsNotLayer0Ftor());
     std::remove_copy_if(labels.begin(), labels.end(),
                         std::back_inserter(layer1Labels),
                         ::IsNotLayer1Ftor());
+    assert(labels.empty());
   }
   // validation
   struct Layer1LabelParams

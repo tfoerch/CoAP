@@ -20,7 +20,7 @@ class Label
 public:
   typedef label::TributarySlots TributarySlots;
   typedef label::FrequencySlot FrequencySlot;
-  ~Label();
+  ~Label(){};
   Label(ServiceType serviceType, const TributarySlots& tributarySlots);
   explicit Label(const FrequencySlot& frequencySlot);
   Label(const Label& other);
@@ -33,7 +33,6 @@ public:
   bool encode(MsgBuffer&  buffer) const;
   static Label decode(const MsgBuffer&  buffer);
 private:
-//  typedef label::impl::LabelImplBase* LabelPtr;
   typedef std::auto_ptr<label::impl::LabelImplBase> LabelPtr;
   LabelPtr           m_labelImplPtr;
 };

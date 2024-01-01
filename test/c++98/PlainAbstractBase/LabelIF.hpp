@@ -10,7 +10,7 @@ class LabelIF
 public:
   typedef label::TributarySlots TributarySlots;
   typedef label::FrequencySlot FrequencySlot;
-  typedef LabelIF* LabelIFPtr;
+  typedef LabelIF* LabelIFPtr; // cannot use std::auto_ptr<> here, refer to http://www.gotw.ca/publications/using_auto_ptr_effectively.htm
   virtual ~LabelIF() {};
   virtual LabelIFPtr clone() const = 0;
   virtual ServiceType getServiceType() const = 0;

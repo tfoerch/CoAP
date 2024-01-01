@@ -8,7 +8,7 @@ else(USE_CLANG)
 SET (CMAKE_CXX_COMPILER             "/usr/bin/g++-13")
 SET (CMAKE_C_COMPILER               "/usr/bin/gcc-13")
 endif(USE_CLANG)
-# set(CMAKE_CXX_CLANG_TIDY "clang-tidy-17")
+set(CMAKE_CXX_CLANG_TIDY "clang-tidy-17")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_VERBOSE_BUILD ON)

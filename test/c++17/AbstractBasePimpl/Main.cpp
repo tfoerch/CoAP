@@ -63,9 +63,13 @@ auto main() -> int // NOLINT(bugprone-exception-escape)
     labels.push_back(std::move(odu2eLabel));
     labels.emplace_back(ServiceType::odu0, label::TributarySlots(tribSlotsOf3rdOdukLabel.begin(), tribSlotsOf3rdOdukLabel.end()));
     labels.emplace_back(freqSlotOf2ndOchLabel);
+    assert(labels.size() == 5);
     std::copy_if(std::make_move_iterator(labels.begin()), std::make_move_iterator(labels.end()),
                  std::back_inserter(layer0Labels),
                  [](const auto& entry){ return entry.getServiceType() == ServiceType::och;});
+    assert(layer0Labels.size() == 2);
+    assert(std::count_if(labels.begin(), labels.end(),
+                         [](const auto& entry){ return entry.getServiceType() != ServiceType::undef; /* has valid object */}) == 3);
     std::copy_if(std::make_move_iterator(labels.begin()), std::make_move_iterator(labels.end()),
                  std::back_inserter(layer1Labels),
                  [](const auto& entry)

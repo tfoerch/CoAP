@@ -2,10 +2,6 @@
 #include "LabelOTNImpl.hpp"
 #include "LabelOCHImpl.hpp"
 
-Label::~Label()
-{
-}
-
 Label::Label(ServiceType serviceType, const TributarySlots& tributarySlots)
 : m_labelImplPtr(new label::impl::LabelOTNImpl(serviceType, tributarySlots))
 {}
