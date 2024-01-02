@@ -1,0 +1,16 @@
+module lmp_neighbor
+{
+  interface Neighbor;
+};
+
+module lmp_neighbor_adjacency_observer
+{
+  interface NeighborAdjacencyObserver
+  {
+    void destroy();
+    void neighborAdjacencyAdded(
+      in lmp_neighbor::Neighbor  aNeighbor);
+    void neighborAdjacencyRemoved(
+      in lmp_neighbor::Neighbor  aNeighbor);
+  };
+};

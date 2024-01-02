@@ -1,0 +1,9 @@
+module lmp_neighbor
+{
+  interface Neighbor
+  {
+    void destroy();
+    void enable();
+    void disable();
+  };
+};

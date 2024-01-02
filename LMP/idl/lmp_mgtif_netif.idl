@@ -1,0 +1,42 @@
+module lmp_ipcc
+{
+  interface IPCC;
+};
+
+module lmp_ipcc_adjacency_observer
+{
+  interface IPCCAdjacencyObserver;
+};
+ 
+module lmp_netif
+{
+  exception No_Such_Entity {};
+  exception Entity_Already_Exists {};
+
+  interface NetworkIF
+  {
+    string getInterfaceName();
+  	short getLocalPortNumber();
+    long getNodeId();
+    void destroy();
+    void enable();
+    void disable();
+    // factory for IPCCs
+    lmp_ipcc::IPCC createIPCC(
+      in long  remoteAddress,
+      in short remotePortNumber)
+      raises (Entity_Already_Exists);
+    lmp_ipcc::IPCC getIPCC(
+      in long  remoteAddress,
+      in short remotePortNumber)
+      raises (No_Such_Entity);
+    void deleteIPCC(
+      in long  remoteAddress,
+      in short remotePortNumber)
+      raises (No_Such_Entity);
+    void registerIPCCAdjacencyObserver(
+      in lmp_ipcc_adjacency_observer::IPCCAdjacencyObserver   observer);
+    void deregisterIPCCAdjacencyObserver(
+      in lmp_ipcc_adjacency_observer::IPCCAdjacencyObserver   observer);
+  };
+};

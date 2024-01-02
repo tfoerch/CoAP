@@ -1,0 +1,58 @@
+#include "lmp_mgtif_ipcc_common.idl"
+
+module lmp_ipcc
+{
+  interface IPCC;
+};
+
+module lmp_ipcc_observer
+{
+  enum IPCC_Event
+  {
+    EvBringUp,
+    EvCCDn,
+    EvConfDone,
+    EvConfErr,
+    EvNewConfOK,
+    EvNewConfErr,
+    EvContenWin,
+    EvContenLost,
+    EvAdminDown,
+    EvNbrGoesDn,
+    EvHelloRcvd,
+    EvHoldTimer,
+    EvSeqNumErr,
+    EvReconfig,
+    EvConfRet,
+    EvHelloRet,
+    EvDownTimer
+  };
+  enum IPCC_Action
+  {
+    ActionSendConfig,
+    ActionStopSendConfig,
+    ActionResendConfig,
+    ActionSendConfigAck,
+    ActionSendConfigNack,
+    ActionSendHello,
+    ActionStopSendHello,
+    ActionSetCCDownFlag,
+    ActionClearCCDownFlag,
+    ActionNoAction
+  };
+
+  interface IPCCObserver
+  {
+    void destroy();
+    void eventProcessed(
+      in lmp_ipcc::IPCC               anIPCC,
+      in IPCC_Event                   event,
+      in lmp_ipcc_common::IPCC_State  sourceState,
+      in lmp_ipcc_common::IPCC_State  targetState,
+      in IPCC_Action                  action);
+    void peerIpccDiscovered(
+      in lmp_ipcc::IPCC               anIPCC,
+      in long                         remoteNodeId,
+      in long                         remoteCCId);
+  };
+};

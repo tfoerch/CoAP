@@ -1,0 +1,12 @@
+module lmp_ipcc_common
+{
+  enum IPCC_State
+  {
+    IPCC_Down,
+    IPCC_ConfSend,
+    IPCC_ConfRecv,
+    IPCC_Active,
+    IPCC_Up,
+    IPCC_GoingDown
+  };
+};

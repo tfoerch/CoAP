@@ -1,0 +1,16 @@
+module lmp_ipcc
+{
+  interface IPCC;
+};
+
+module lmp_ipcc_adjacency_observer
+{
+  interface IPCCAdjacencyObserver
+  {
+    void destroy();
+    void ipccAdjacencyAdded(
+      in lmp_ipcc::IPCC  aIPCC);
+    void ipccAdjacencyRemoved(
+      in lmp_ipcc::IPCC  aIPCC);
+  };
+};

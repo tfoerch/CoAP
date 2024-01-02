@@ -1,0 +1,22 @@
+module lmp_node
+{
+  interface Node;
+};
+
+module lmp_node_registry
+{
+  exception No_Such_Entity {};
+  interface NodeRegistry
+  {
+    void registerNode(
+      in lmp_node::Node  aNode);
+    void deregisterNode(
+      in lmp_node::Node  aNode);
+    boolean isNodeRegistered(
+      in long  nodeId);
+    lmp_node::Node getNode(
+      in long  nodeId)
+      raises (No_Such_Entity);
+    void shutdown();
+  };
+};

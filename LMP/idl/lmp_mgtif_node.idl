@@ -1,0 +1,52 @@
+module lmp_netif
+{
+  interface NetworkIF;
+};
+
+module lmp_neighbor
+{
+  interface Neighbor;
+};
+
+module lmp_neighbor_adjacency_observer
+{
+  interface NeighborAdjacencyObserver;
+};
+
+module lmp_node
+{
+  exception No_Such_Entity {};
+  exception Entity_Already_Exists {};
+
+  interface Node
+  {
+    long getNodeId();
+    // factory for NetworkIFs
+    lmp_netif::NetworkIF createNetworkIF(
+      in string  interfaceName,
+      in short   localPortNumber)
+      raises (Entity_Already_Exists);
+    lmp_netif::NetworkIF getNetworkIF(
+      in string  interfaceName,
+      in short   localPortNumber)
+      raises (No_Such_Entity);
+    void deleteNetworkIF(
+      in string  interfaceName,
+      in short   localPortNumber)
+      raises (No_Such_Entity);
+    void registerNeighborAdjacencyObserver(
+      in lmp_neighbor_adjacency_observer::NeighborAdjacencyObserver   observer);
+    void deregisterNeighborAdjacencyObserver(
+      in lmp_neighbor_adjacency_observer::NeighborAdjacencyObserver   observer);
+    lmp_neighbor::Neighbor createNeighbor(
+      in long  remoteNodeId)
+      raises (Entity_Already_Exists);
+    lmp_neighbor::Neighbor getNeighbor(
+      in long  remoteNodeId)
+      raises (No_Such_Entity);
+    void deleteNeighbor(
+      in long  remoteNodeId)
+      raises (No_Such_Entity);
+    void destroy();
+  };
+};
